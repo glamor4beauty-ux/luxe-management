@@ -2,20 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, FileText, Calendar, Monitor, Upload, Loader2, Phone, MessageSquare, Mail } from 'lucide-react';
+import { ArrowLeft, Pencil, FileText, Calendar, Monitor, Upload, Loader2, Phone, MessageSquare } from 'lucide-react';
 import ContractGenerator from '../components/performers/ContractGenerator';
 import EmailTemplates from '../components/performers/EmailTemplates';
 import PerformerTasks from '../components/performers/PerformerTasks';
 
-const InfoRow = ({ label, value }) => value ? (
-  <div className="flex flex-col min-w-0">
-    <span className="text-xs text-muted-foreground">{label}</span>
-    <span className="text-sm text-foreground break-words">{value}</span>
-  </div>
-) : null;
-
 const Section = ({ title, icon: Icon, children }) => (
-  <div className="bg-card border border-border rounded-xl p-5">
+  <div className="bg-card border border-border rounded-lg p-4">
     <div className="flex items-center gap-2 mb-4">
       <Icon className="h-4 w-4 text-primary" />
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
@@ -58,6 +51,26 @@ export default function PerformerView() {
     load();
   }, [id]);
 
+  const handlePhotoUpload = async (type) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setUploadingPhoto(true);
+      try {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        await base44.entities.Performer.update(performer.id, { [type]: file_url });
+        setPerformer(p => ({ ...p, [type]: file_url }));
+      } catch (err) {
+        console.error(err);
+      }
+      setUploadingPhoto(false);
+    };
+    input.click();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -69,42 +82,19 @@ export default function PerformerView() {
   if (!performer) return null;
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/performers')} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              {performer.profilePhoto ? (
-                <img src={performer.profilePhoto} alt="" className="h-16 w-16 rounded-full object-cover border-2 border-primary/20" />
-              ) : (
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-                  {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
-                </div>
-              )}
-              <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                {uploadingPhoto ? <Loader2 className="h-4 w-4 text-white animate-spin" /> : <Upload className="h-4 w-4 text-white" />}
-                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  setUploadingPhoto(true);
-                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                  await base44.entities.Performer.update(performer.id, { profilePhoto: file_url });
-                  setPerformer(p => ({ ...p, profilePhoto: file_url }));
-                  setUploadingPhoto(false);
-                }} />
-              </label>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{performer.firstName} {performer.lastName}</h1>
-              <p className="text-sm text-primary">@{performer.stageName}</p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{performer.firstName} {performer.lastName}</h1>
+            <p className="text-sm text-primary">@{performer.stageName}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {/* SMS / Phone toggle */}
           <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
             <button
               onClick={() => setContactMode('phone')}
@@ -130,203 +120,254 @@ export default function PerformerView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Basic Info */}
-        <div className="bg-card border border-border rounded-xl p-6 lg:col-span-2 space-y-6">
-
-          {/* Row 1: Photo + contact info */}
-          <div className="flex gap-6 items-start">
-            <div className="shrink-0">
-              {performer.profilePhoto ? (
-                <img src={performer.profilePhoto} alt="Profile" className="w-28 h-28 object-cover rounded-xl border border-border" />
+      {/* Profile Photos */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+        <h2 className="text-lg font-semibold text-foreground">Profile Photos</h2>
+        {[{ key: 'profilePhoto', label: 'Profile Photo' }, { key: 'idFront', label: 'ID Front' }, { key: 'idBack', label: 'ID Back' }, { key: 'faceId', label: 'Face + ID' }].map(photo => (
+          <div key={photo.key} className="flex items-center justify-between gap-3 bg-secondary/50 rounded-lg p-3">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">{photo.label}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {performer[photo.key] ? (
+                <img src={performer[photo.key]} alt={photo.label} className="h-12 w-12 rounded object-cover border border-border" />
               ) : (
-                <div className="w-28 h-28 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl border border-border">
-                  {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
-                </div>
+                <div className="h-12 w-12 rounded bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">None</div>
               )}
-            </div>
-            <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {performer.email ? (
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs text-muted-foreground">Email</span>
-                  <a href={`mailto:${performer.email}`} className="text-sm text-foreground hover:text-primary transition-colors break-words">{performer.email}</a>
-                </div>
-              ) : null}
-              {performer.phone ? (
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs text-muted-foreground">Phone</span>
-                  <a href={contactMode === 'sms' ? `sms:${performer.phone}` : `tel:${performer.phone}`} className="text-sm text-foreground hover:text-primary transition-colors break-words">{performer.phone}</a>
-                </div>
-              ) : null}
-              <InfoRow label="Stage Name" value={performer.stageName} />
-              <InfoRow label="Recruiter" value={performer.recruiterName} />
-              <InfoRow label="Applying For" value={performer.applyingFor} />
-              <InfoRow label="Date of Birth" value={performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : null} />
-              <InfoRow label="Display Age" value={performer.displayAge} />
-              <InfoRow label="Primary Language" value={performer.primaryLanguage} />
+              <Button size="sm" variant="outline" onClick={() => handlePhotoUpload(photo.key)} disabled={uploadingPhoto} className="border-border h-8 text-xs">
+                {uploadingPhoto ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
+                Upload
+              </Button>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Row 2: Address */}
-          <div className="pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <InfoRow label="Street" value={performer.streetAddress} />
-            <InfoRow label="City" value={performer.city} />
-            <InfoRow label="State" value={performer.state} />
-            <InfoRow label="Country" value={performer.country} />
-            <InfoRow label="Zip Code" value={performer.zipCode} />
-          </div>
-
-          {/* Row 3: Orientation, Other Language, Ethnicity */}
-          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
-            <InfoRow label="Orientation" value={performer.orientation} />
-            <InfoRow label="Other Language" value={performer.otherLanguage} />
-            <InfoRow label="Ethnicity" value={performer.ethnicity} />
-          </div>
-
-          {/* Row 4: Height, Weight, Build */}
-          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
-            <InfoRow label="Height" value={performer.height} />
-            <InfoRow label="Weight" value={performer.weight} />
-            <InfoRow label="Build" value={performer.build} />
-          </div>
-
-          {/* Row 5: Eye Color, Hair Color, Hair Length */}
-          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
-            <InfoRow label="Eye Color" value={performer.eyeColor} />
-            <InfoRow label="Hair Color" value={performer.hairColor} />
-            <InfoRow label="Hair Length" value={performer.hairLength} />
-          </div>
-
-          {/* Row 6: Breast Size, Butt Size, Dress Size */}
-          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
-            <InfoRow label="Breast Size" value={performer.breastSize} />
-            <InfoRow label="Butt Size" value={performer.buttSize} />
-            <InfoRow label="Dress Size" value={performer.dressSize} />
-          </div>
-
-          {/* Row 7: About */}
-          {performer.aboutMe && (
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-1">About</p>
-              <p className="text-sm text-foreground">{performer.aboutMe}</p>
-            </div>
-          )}
-
-          {/* Row 8: Turns On */}
-          {performer.turnsOn && (
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-1">Turns On</p>
-              <p className="text-sm text-foreground">{performer.turnsOn}</p>
-            </div>
-          )}
-
-          {/* Row 9: Turns Off */}
-          {performer.turnsOff && (
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-1">Turns Off</p>
-              <p className="text-sm text-foreground">{performer.turnsOff}</p>
-            </div>
-          )}
+      {/* Personal Info */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
+        <h2 className="text-lg font-semibold text-foreground">Personal Info</h2>
+        <div>
+          <p className="text-xs text-muted-foreground">First Name</p>
+          <p className="font-medium text-foreground">{performer.firstName}</p>
         </div>
-
-        {/* Memos */}
-        <Section title={`Memos (${memos.length})`} icon={FileText}>
-          {memos.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No memos found.</p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {memos.map(m => (
-                <div key={m.id} className="bg-secondary/50 rounded-lg p-3 text-sm text-foreground">
-                  {m.memo}
-                </div>
-              ))}
-            </div>
-          )}
-        </Section>
-
-        {/* Calendar */}
-        <Section title={`Calendar Events (${events.length})`} icon={Calendar}>
-          {events.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No scheduled events.</p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {events.map(e => (
-                <div key={e.id} className="bg-secondary/50 rounded-lg p-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-foreground">{new Date(e.startTime).toLocaleString()}</span>
-                    <span className="text-primary font-medium">{e.totalHours}h</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">to {new Date(e.endTime).toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </Section>
-
-        {/* Stripchat */}
-        <Section title={`Stripchat (${stripchat.length})`} icon={Monitor}>
-          {stripchat.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No Stripchat profiles.</p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {stripchat.map(s => (
-                <div key={s.id} className="bg-secondary/50 rounded-lg p-3 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-foreground">{s.profileUrl || 'No URL'}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-green-500/10 text-green-400' : s.status === 'inactive' ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
-                      {s.status || 'pending'}
-                    </span>
-                  </div>
-                  {s.notes && <p className="text-xs text-muted-foreground mt-1">{s.notes}</p>}
-                </div>
-              ))}
-            </div>
-          )}
-        </Section>
-
-        {/* Photos & ID */}
-        {(performer.profilePhoto || performer.idFront || performer.idBack || performer.faceId) && (
-          <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Photos & ID</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {performer.profilePhoto && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Profile Photo</p>
-                  <img src={performer.profilePhoto} alt="Profile" className="w-full aspect-square object-cover rounded-lg border border-border" />
-                </div>
-              )}
-              {performer.idFront && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">ID Front</p>
-                  <img src={performer.idFront} alt="ID Front" className="w-full aspect-square object-cover rounded-lg border border-border" />
-                </div>
-              )}
-              {performer.idBack && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">ID Back</p>
-                  <img src={performer.idBack} alt="ID Back" className="w-full aspect-square object-cover rounded-lg border border-border" />
-                </div>
-              )}
-              {performer.faceId && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Face + ID</p>
-                  <img src={performer.faceId} alt="Face + ID" className="w-full aspect-square object-cover rounded-lg border border-border" />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Email Templates */}
-        <div className="lg:col-span-2">
-          <EmailTemplates performer={performer} />
+        <div>
+          <p className="text-xs text-muted-foreground">Last Name</p>
+          <p className="font-medium text-foreground">{performer.lastName}</p>
         </div>
-
-        {/* Tasks */}
-        <div className="lg:col-span-2">
-          <PerformerTasks performer={performer} />
+        <div>
+          <p className="text-xs text-muted-foreground">Stage Name (Read-only)</p>
+          <p className="font-medium text-foreground bg-secondary/50 rounded px-3 py-2">{performer.stageName}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Email</p>
+          <a href={`mailto:${performer.email}`} className="font-medium text-primary hover:underline break-all">{performer.email}</a>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Phone</p>
+          <a href={contactMode === 'sms' ? `sms:${performer.phone}` : `tel:${performer.phone}`} className="font-medium text-primary hover:underline break-all">{performer.phone || '-'}</a>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Date of Birth</p>
+          <p className="font-medium text-foreground">{performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Display Age</p>
+          <p className="font-medium text-foreground">{performer.displayAge || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Recruiter</p>
+          <p className="font-medium text-foreground">{performer.recruiterName || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Applying For</p>
+          <p className="font-medium text-foreground">{performer.applyingFor || '-'}</p>
         </div>
       </div>
+
+      {/* Location */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
+        <h2 className="text-lg font-semibold text-foreground">Location</h2>
+        <div>
+          <p className="text-xs text-muted-foreground">Street Address</p>
+          <p className="font-medium text-foreground">{performer.streetAddress || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">City</p>
+          <p className="font-medium text-foreground">{performer.city || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">State</p>
+          <p className="font-medium text-foreground">{performer.state || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Country</p>
+          <p className="font-medium text-foreground">{performer.country || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Zip Code</p>
+          <p className="font-medium text-foreground">{performer.zipCode || '-'}</p>
+        </div>
+      </div>
+
+      {/* Languages */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
+        <h2 className="text-lg font-semibold text-foreground">Languages</h2>
+        <div>
+          <p className="text-xs text-muted-foreground">Primary Language</p>
+          <p className="font-medium text-foreground">{performer.primaryLanguage || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Other Language</p>
+          <p className="font-medium text-foreground">{performer.otherLanguage || '-'}</p>
+        </div>
+      </div>
+
+      {/* Physical Attributes */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
+        <h2 className="text-lg font-semibold text-foreground">Physical Attributes</h2>
+        <div>
+          <p className="text-xs text-muted-foreground">Height</p>
+          <p className="font-medium text-foreground">{performer.height || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Weight</p>
+          <p className="font-medium text-foreground">{performer.weight || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Build</p>
+          <p className="font-medium text-foreground">{performer.build || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Ethnicity</p>
+          <p className="font-medium text-foreground">{performer.ethnicity || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Eye Color</p>
+          <p className="font-medium text-foreground">{performer.eyeColor || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Hair Color</p>
+          <p className="font-medium text-foreground">{performer.hairColor || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Hair Length</p>
+          <p className="font-medium text-foreground">{performer.hairLength || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Breast Size</p>
+          <p className="font-medium text-foreground">{performer.breastSize || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Butt Size</p>
+          <p className="font-medium text-foreground">{performer.buttSize || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Dress Size</p>
+          <p className="font-medium text-foreground">{performer.dressSize || '-'}</p>
+        </div>
+      </div>
+
+      {/* Preferences */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
+        <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+        <div>
+          <p className="text-xs text-muted-foreground">Orientation</p>
+          <p className="font-medium text-foreground">{performer.orientation || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Sexual Preferences</p>
+          <p className="font-medium text-foreground">{performer.sexualPreferences || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Interested In</p>
+          <p className="font-medium text-foreground">{performer.interestedIn || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Turns On</p>
+          <p className="font-medium text-foreground">{performer.turnsOn || '-'}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Turns Off</p>
+          <p className="font-medium text-foreground">{performer.turnsOff || '-'}</p>
+        </div>
+      </div>
+
+      {/* About */}
+      {performer.aboutMe && (
+        <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
+          <h2 className="text-lg font-semibold text-foreground">About</h2>
+          <p className="text-foreground leading-relaxed">{performer.aboutMe}</p>
+        </div>
+      )}
+
+      {/* Commission */}
+      {performer.commissionRate && (
+        <div className="bg-card border border-border rounded-lg p-4">
+          <p className="text-xs text-muted-foreground">Commission Rate</p>
+          <p className="text-lg font-semibold text-primary">{performer.commissionRate}%</p>
+        </div>
+      )}
+
+      {/* Memos */}
+      <Section title={`Memos (${memos.length})`} icon={FileText}>
+        {memos.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No memos found.</p>
+        ) : (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {memos.map(m => (
+              <div key={m.id} className="bg-secondary/50 rounded-lg p-3 text-sm text-foreground">
+                {m.memo}
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {/* Calendar */}
+      <Section title={`Calendar Events (${events.length})`} icon={Calendar}>
+        {events.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No scheduled events.</p>
+        ) : (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {events.map(e => (
+              <div key={e.id} className="bg-secondary/50 rounded-lg p-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-foreground">{new Date(e.startTime).toLocaleString()}</span>
+                  <span className="text-primary font-medium">{e.totalHours}h</span>
+                </div>
+                <span className="text-xs text-muted-foreground">to {new Date(e.endTime).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {/* Stripchat */}
+      <Section title={`Stripchat (${stripchat.length})`} icon={Monitor}>
+        {stripchat.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No Stripchat profiles.</p>
+        ) : (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {stripchat.map(s => (
+              <div key={s.id} className="bg-secondary/50 rounded-lg p-3 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-foreground">{s.profileUrl || 'No URL'}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'active' ? 'bg-green-500/10 text-green-400' : s.status === 'inactive' ? 'bg-red-500/10 text-red-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                    {s.status || 'pending'}
+                  </span>
+                </div>
+                {s.notes && <p className="text-xs text-muted-foreground mt-1">{s.notes}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      {/* Email Templates */}
+      <EmailTemplates performer={performer} />
+
+      {/* Tasks */}
+      <PerformerTasks performer={performer} />
     </div>
   );
 }
