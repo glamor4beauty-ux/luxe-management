@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil, FileText, Calendar, Monitor } from 'lucide-react';
 import ContractGenerator from '../components/performers/ContractGenerator';
+import PerformerTasks from '../components/performers/PerformerTasks';
 
 const InfoRow = ({ label, value }) => value ? (
   <div className="flex flex-col">
@@ -177,6 +178,11 @@ export default function PerformerView() {
             </div>
           )}
         </Section>
+
+        {/* Tasks */}
+        <div className="lg:col-span-2">
+          <PerformerTasks performer={performer} />
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, Menu, X } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from "@/lib/utils";
 import {
@@ -14,6 +14,7 @@ const navItems = [
   { path: '/calendar', label: 'Calendar', icon: Calendar },
   { path: '/stripchat', label: 'Stripchat', icon: Monitor },
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
+  { path: '/tasks', label: 'Tasks', icon: ClipboardList },
 ];
 
 export default function Layout() {
