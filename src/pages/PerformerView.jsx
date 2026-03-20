@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, FileText, Calendar, Monitor } from 'lucide-react';
+import { ArrowLeft, Pencil, FileText, Calendar, Monitor, Upload, Loader2 } from 'lucide-react';
 import ContractGenerator from '../components/performers/ContractGenerator';
 import PerformerTasks from '../components/performers/PerformerTasks';
 
@@ -32,6 +32,7 @@ export default function PerformerView() {
   const [stripchat, setStripchat] = useState([]);
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -73,13 +74,27 @@ export default function PerformerView() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-4">
-            {performer.profilePhoto ? (
-              <img src={performer.profilePhoto} alt="" className="h-12 w-12 rounded-full object-cover border-2 border-primary/20" />
-            ) : (
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
-              </div>
-            )}
+            <div className="relative group">
+              {performer.profilePhoto ? (
+                <img src={performer.profilePhoto} alt="" className="h-16 w-16 rounded-full object-cover border-2 border-primary/20" />
+              ) : (
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                  {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
+                </div>
+              )}
+              <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                {uploadingPhoto ? <Loader2 className="h-4 w-4 text-white animate-spin" /> : <Upload className="h-4 w-4 text-white" />}
+                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploadingPhoto(true);
+                  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                  await base44.entities.Performer.update(performer.id, { profilePhoto: file_url });
+                  setPerformer(p => ({ ...p, profilePhoto: file_url }));
+                  setUploadingPhoto(false);
+                }} />
+              </label>
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">{performer.firstName} {performer.lastName}</h1>
               <p className="text-sm text-primary">@{performer.stageName}</p>
@@ -116,10 +131,26 @@ export default function PerformerView() {
             <InfoRow label="Orientation" value={performer.orientation} />
             <InfoRow label="Primary Language" value={performer.primaryLanguage} />
           </div>
-          {performer.aboutMe && (
-            <div className="mt-4 pt-4 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-1">About</p>
-              <p className="text-sm text-foreground">{performer.aboutMe}</p>
+          {(performer.aboutMe || performer.turnsOn || performer.turnsOff) && (
+            <div className="mt-4 pt-4 border-t border-border space-y-3">
+              {performer.aboutMe && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">About</p>
+                  <p className="text-sm text-foreground">{performer.aboutMe}</p>
+                </div>
+              )}
+              {performer.turnsOn && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Turns On</p>
+                  <p className="text-sm text-foreground">{performer.turnsOn}</p>
+                </div>
+              )}
+              {performer.turnsOff && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Turns Off</p>
+                  <p className="text-sm text-foreground">{performer.turnsOff}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
