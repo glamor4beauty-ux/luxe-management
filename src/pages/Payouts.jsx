@@ -180,41 +180,7 @@ export default function Payouts() {
             <div className="mb-4">
               <Label className="text-xs text-muted-foreground mb-1.5 block">Select Performers *</Label>
               <div className="border border-border rounded-lg bg-secondary overflow-hidden">
-                <div className="p-2 border-b border-border">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder="Search performers..."
-                      value={profileSearch}
-                      onChange={e => setProfileSearch(e.target.value)}
-                      className="pl-7 h-8 text-xs bg-card border-border"
-                    />
-                  </div>
-                </div>
-                <div className="max-h-44 overflow-y-auto p-1">
-                  {stripchatProfiles
-                    .filter(p => p.stageName && (!profileSearch || p.stageName.toLowerCase().includes(profileSearch.toLowerCase())))
-                    .map(p => (
-                      <label key={p.stageName} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-card cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedPerformers.includes(p.stageName)}
-                          onChange={e => {
-                            setSelectedPerformers(prev =>
-                              e.target.checked ? [...prev, p.stageName] : prev.filter(n => n !== p.stageName)
-                            );
-                          }}
-                          className="accent-primary"
-                        />
-                        <span className="text-sm text-foreground">{p.stageName}</span>
-                        <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
-                          p.status === 'active' ? 'bg-green-500/10 text-green-400' :
-                          p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
-                          'bg-yellow-500/10 text-yellow-400'
-                        }`}>{p.status || 'pending'}</span>
-                      </label>
-                    ))
-                  }
+                <div className="max-h-56 overflow-y-auto p-1">
                   {stripchatProfiles.filter(p => p.stageName).length === 0 && (
                     <p className="text-xs text-muted-foreground px-3 py-2">No Stripchat profiles found.</p>
                   )}
