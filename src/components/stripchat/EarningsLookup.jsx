@@ -1,4 +1,9 @@
 import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Loader2, TrendingUp, DollarSign } from 'lucide-react';
 import { toast } from "sonner";
 
 const EARNINGS_KEYS = [
@@ -25,12 +30,15 @@ const EARNINGS_KEYS = [
 export default function EarningsLookup({ profiles }) {
   const [performers, setPerformers] = useState([]);
   const [modelUsername, setModelUsername] = useState('');
+  const [periodStart, setPeriodStart] = useState('');
+  const [periodEnd, setPeriodEnd] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
   useEffect(() => {
     base44.entities.Performer.list().then(setPerformers);
   }, []);
 
-  // Build merged list: stripchat profiles joined with performer real names
   const modelOptions = profiles
     .filter(p => p.stageName)
     .map(p => {
@@ -47,21 +55,15 @@ export default function EarningsLookup({ profiles }) {
 
     setLoading(true);
     setResult(null);
-    try {
-      const payload = {
-        modelUsername,
-        periodStart: periodStart + ' 00:00:00',
-        periodEnd: periodEnd + ' 23:59:59',
-      };
-
-      const res = await base44.functions.invoke('stripchatEarnings', payload);
-      if (res.data?.error) {
-        toast.error(res.data.error);
-      } else {
-        setResult(res.data);
-      }
-    } catch (e) {
-      toast.error(e.message);
+    const res = await base44.functions.invoke('stripchatEarnings', {
+      modelUsername,
+      periodStart: periodStart + ' 00:00:00',
+      periodEnd: periodEnd + ' 23:59:59',
+    });
+    if (res.data?.error) {
+      toast.error(res.data.error);
+    } else {
+      setResult(res.data);
     }
     setLoading(false);
   };
@@ -74,7 +76,7 @@ export default function EarningsLookup({ profiles }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-        {/* Model checklist */}
+        {/* Model list */}
         <div className="sm:col-span-3">
           <Label className="text-xs text-muted-foreground mb-1.5 block">Model *</Label>
           <div className="border border-border rounded-lg bg-secondary overflow-hidden">
@@ -104,23 +106,13 @@ export default function EarningsLookup({ profiles }) {
         {/* Period Start */}
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5 block">Period Start *</Label>
-          <Input
-            type="date"
-            value={periodStart}
-            onChange={e => setPeriodStart(e.target.value)}
-            className="bg-secondary border-border text-foreground h-9 text-sm"
-          />
+          <Input type="date" value={periodStart} onChange={e => setPeriodStart(e.target.value)} className="bg-secondary border-border text-foreground h-9 text-sm" />
         </div>
 
         {/* Period End */}
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5 block">Period End *</Label>
-          <Input
-            type="date"
-            value={periodEnd}
-            onChange={e => setPeriodEnd(e.target.value)}
-            className="bg-secondary border-border text-foreground h-9 text-sm"
-          />
+          <Input type="date" value={periodEnd} onChange={e => setPeriodEnd(e.target.value)} className="bg-secondary border-border text-foreground h-9 text-sm" />
         </div>
       </div>
 
