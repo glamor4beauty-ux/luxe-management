@@ -86,7 +86,6 @@ export default function EarningsLookup({ profiles }) {
     try {
       const payload = {
         modelUsername,
-        periodType: 'custom',
         periodStart: periodStart + ' 00:00:00',
         periodEnd: periodEnd + ' 23:59:59',
       };
