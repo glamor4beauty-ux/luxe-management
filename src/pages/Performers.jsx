@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function Performers() {
+  const { user } = useAuth();
   const [performers, setPerformers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -19,7 +21,10 @@ export default function Performers() {
   const load = async () => {
     setLoading(true);
     const data = await base44.entities.Performer.list('-created_date');
-    setPerformers(data);
+    const filtered = user?.role === 'recruiter' 
+      ? data.filter(p => p.recruiterName === user.full_name)
+      : data;
+    setPerformers(filtered);
     setLoading(false);
   };
 
@@ -44,8 +49,10 @@ export default function Performers() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Performers</h1>
-          <p className="text-sm text-muted-foreground mt-1">{performers.length} total performers</p>
-        </div>
+          <p className="text-sm text-muted-foreground mt-1">
+            {user?.role === 'recruiter' ? 'My Performers' : 'All Performers'} ({performers.length})
+          </p>
+          </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* SMS / Phone toggle */}
           <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
@@ -66,13 +73,17 @@ export default function Performers() {
               <MessageSquare className="h-3 w-3" /> SMS
             </button>
           </div>
-          <ImportExportBar onImportComplete={load} />
-          <Link to="/performers/new">
-            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" /> Add Performer
-            </Button>
-          </Link>
-        </div>
+          {user?.role === 'admin' && (
+            <>
+              <ImportExportBar onImportComplete={load} />
+              <Link to="/performers/new">
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Plus className="h-4 w-4 mr-2" /> Add Performer
+                </Button>
+              </Link>
+            </>
+          )}
+          </div>
       </div>
 
       <div className="mb-4">
