@@ -81,7 +81,7 @@ export default function PerformerView() {
             </div>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate(`/performers/${id}/edit`)} className="border-border">
+        <Button variant="outline" size="sm" onClick={() => navigate(`/performers/${performer.id}/edit`)} className="border-border">
           <Pencil className="h-4 w-4 mr-2" /> Edit
         </Button>
       </div>
