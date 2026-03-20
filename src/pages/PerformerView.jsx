@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil, FileText, Calendar, Monitor, Upload, Loader2, Phone, MessageSquare, Mail } from 'lucide-react';
 import ContractGenerator from '../components/performers/ContractGenerator';
+import EmailTemplates from '../components/performers/EmailTemplates';
 import PerformerTasks from '../components/performers/PerformerTasks';
 
 const InfoRow = ({ label, value }) => value ? (
@@ -315,6 +316,11 @@ export default function PerformerView() {
             </div>
           </div>
         )}
+
+        {/* Email Templates */}
+        <div className="lg:col-span-2">
+          <EmailTemplates performer={performer} />
+        </div>
 
         {/* Tasks */}
         <div className="lg:col-span-2">
