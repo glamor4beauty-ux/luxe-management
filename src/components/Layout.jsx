@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ const adminNavItems = [
   { path: '/stripchat', label: 'Stripchat', icon: Monitor },
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
+  { path: '/users', label: 'Users', icon: Settings },
 ];
 
 const recruiterNavItems = [
