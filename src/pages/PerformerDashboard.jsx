@@ -39,35 +39,41 @@ export default function PerformerDashboard() {
       {performer && (
         <div className="bg-card border border-border rounded-lg p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Your Profile</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-xs text-muted-foreground">Name</p>
-              <p className="font-medium text-foreground">{performer.firstName} {performer.lastName}</p>
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="shrink-0">
+              {performer.profilePhoto ? (
+                <img src={performer.profilePhoto} alt="Profile" className="h-40 w-40 rounded-lg object-cover border border-border" />
+              ) : (
+                <div className="h-40 w-40 rounded-lg bg-secondary border border-border flex items-center justify-center">
+                  <span className="text-sm text-muted-foreground">No photo</span>
+                </div>
+              )}
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Email</p>
-              <p className="font-medium text-foreground">{performer.email}</p>
+            <div className="flex-1">
+              <div className="mb-4">
+                <h3 className="text-xl font-bold text-foreground">{performer.firstName} {performer.lastName}</h3>
+                <p className="text-sm text-primary font-medium">@{performer.stageName}</p>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed mb-4">{performer.aboutMe || 'No bio added yet'}</p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-medium text-foreground">{performer.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <p className="font-medium text-foreground">{performer.phone || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Age</p>
+                  <p className="font-medium text-foreground">{performer.displayAge || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Orientation</p>
+                  <p className="font-medium text-foreground">{performer.orientation || '-'}</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Phone</p>
-              <p className="font-medium text-foreground">{performer.phone || '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Age</p>
-              <p className="font-medium text-foreground">{performer.displayAge || '-'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Location</p>
-              <p className="font-medium text-foreground">{performer.city}, {performer.state}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Orientation</p>
-              <p className="font-medium text-foreground">{performer.orientation || '-'}</p>
-            </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-2">About</p>
-            <p className="text-sm text-foreground">{performer.aboutMe || 'No bio added yet'}</p>
           </div>
         </div>
       )}
