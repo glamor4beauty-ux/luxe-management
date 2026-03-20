@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { cn } from "@/lib/utils";
@@ -77,6 +78,15 @@ export default function Layout() {
               );
             })}
           </SidebarMenu>
+          <div className="border-t border-sidebar-border pt-3 mt-auto px-3">
+            <button
+              onClick={() => base44.auth.logout()}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:text-destructive hover:bg-destructive/10 transition-colors font-medium"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
