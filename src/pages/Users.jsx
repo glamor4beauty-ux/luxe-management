@@ -184,7 +184,14 @@ export default function Users() {
                           className="h-8 text-xs bg-secondary border-border"
                         />
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">{u.stageName || '-'}</td>
+                      <td className="px-4 py-3">
+                        <Input
+                          value={editingData[u.id]?.stageName ?? u.stageName ?? ''}
+                          onChange={(e) => handleEditChange(u.id, 'stageName', e.target.value)}
+                          placeholder="Stage name"
+                          className="h-8 text-xs bg-secondary border-border"
+                        />
+                      </td>
                       <td className="px-4 py-3">
                         <Input
                           value={editingData[u.id]?.email ?? u.email}
