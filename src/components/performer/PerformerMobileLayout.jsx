@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
-  { path: '/performer-knowledge', label: 'Learn', icon: BookOpen },
+  { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
   { path: '/performer-stripchat-view', label: 'Stripchat', icon: Monitor },
   { path: '/performer-upload', label: 'Upload', icon: Upload },
   { path: '/performer-support', label: 'Support', icon: MessageSquare },
@@ -18,11 +18,11 @@ export default function PerformerMobileLayout() {
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border px-4 py-3 sticky top-0 z-10">
-        <div>
-          <h1 className="text-sm font-bold text-primary">LUXE</h1>
-          <p className="text-xs text-muted-foreground">Model Management</p>
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">Welcome, {user?.full_name}</p>
+        <h1 className="text-lg font-bold text-foreground mb-1">
+          <span className="text-primary">LUXE</span>
+          <span className="text-foreground/60 font-light ml-2">Model Management</span>
+        </h1>
+        <p className="text-xs text-muted-foreground">Hi {user?.full_name}</p>
       </header>
 
       {/* Main Content */}
