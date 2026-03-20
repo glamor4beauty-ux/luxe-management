@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { Users, FileText, Calendar, Monitor, ArrowRight, DollarSign, CheckCircle } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, ArrowRight, DollarSign, CheckCircle, TrendingUp, Activity } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 const StatCard = ({ icon: Icon, label, count, to, color }) => (
   <Link to={to} className="group bg-card border border-border rounded-xl p-6 hover:border-primary/30 transition-all duration-300">
@@ -18,32 +22,23 @@ const StatCard = ({ icon: Icon, label, count, to, color }) => (
   </Link>
 );
 
+const COLORS = ['hsl(42,80%,55%)', 'hsl(200,70%,50%)', 'hsl(160,60%,45%)', 'hsl(280,65%,60%)', 'hsl(340,75%,55%)'];
+
+function getWeekLabel(date) {
+  const d = new Date(date);
+  const week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 604800000);
+  return `W${week + 1}`;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState({ performers: 0, memos: 0, calendars: 0, stripchats: 0 });
   const [unpaidPayouts, setUnpaidPayouts] = useState([]);
   const [markingAll, setMarkingAll] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function load() {
-      const [performers, memos, calendars, stripchats, payouts] = await Promise.all([
-        base44.entities.Performer.list(),
-        base44.entities.Memo.list(),
-        base44.entities.Calendar.list(),
-        base44.entities.Stripchat.list(),
-        base44.entities.Payout.filter({ status: 'unpaid' }),
-      ]);
-      setStats({
-        performers: performers.length,
-        memos: memos.length,
-        calendars: calendars.length,
-        stripchats: stripchats.length,
-      });
-      setUnpaidPayouts(payouts);
-      setLoading(false);
-    }
-    load();
-  }, []);
+  const [signupData, setSignupData] = useState([]);
+  const [platformData, setPlatformData] = useState([]);
+  const [activePerformers, setActivePerformers] = useState(0);
+  const [pendingTasks, setPendingTasks] = useState(0);
 
   const handleMarkAllPaid = async () => {
     setMarkingAll(true);
