@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil, FileText, Calendar, Monitor } from 'lucide-react';
+import ContractGenerator from '../components/performers/ContractGenerator';
 
 const InfoRow = ({ label, value }) => value ? (
   <div className="flex flex-col">
@@ -28,6 +29,7 @@ export default function PerformerView() {
   const [memos, setMemos] = useState([]);
   const [events, setEvents] = useState([]);
   const [stripchat, setStripchat] = useState([]);
+  const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,14 +39,16 @@ export default function PerformerView() {
       const p = res[0];
       setPerformer(p);
 
-      const [m, e, s] = await Promise.all([
+      const [m, e, s, pay] = await Promise.all([
         base44.entities.Memo.filter({ email: p.email }),
         base44.entities.Calendar.filter({ stageName: p.stageName }),
         base44.entities.Stripchat.filter({ stageName: p.stageName }),
+        base44.entities.Payout.filter({ stageName: p.stageName }),
       ]);
       setMemos(m);
       setEvents(e);
       setStripchat(s);
+      setPayouts(pay);
       setLoading(false);
     }
     load();
@@ -81,9 +85,12 @@ export default function PerformerView() {
             </div>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate(`/performers/${performer.id}/edit`)} className="border-border">
-          <Pencil className="h-4 w-4 mr-2" /> Edit
-        </Button>
+        <div className="flex gap-2">
+          <ContractGenerator performer={performer} payouts={payouts} />
+          <Button variant="outline" size="sm" onClick={() => navigate(`/performers/${performer.id}/edit`)} className="border-border">
+            <Pencil className="h-4 w-4 mr-2" /> Edit
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
