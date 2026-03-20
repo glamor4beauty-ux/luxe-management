@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Layout from './components/Layout';
+import PerformerMobileLayout from './components/performer/PerformerMobileLayout';
 import Dashboard from './pages/Dashboard';
 import Performers from './pages/Performers';
 import PerformerForm from './pages/PerformerForm';
@@ -74,14 +75,15 @@ const AuthenticatedApp = () => {
         <Route path="/stripchat" element={<StripchatPage />} />
         <Route path="/payouts" element={<Payouts />} />
         <Route path="/tasks" element={<Tasks />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/performer" element={<PerformerDashboard />} />
-        <Route path="/performer-shifts" element={<PerformerShifts />} />
-        <Route path="/support" element={<SupportContact />} />
-        <Route path="/knowledge-base" element={<KnowledgeBase />} />
-        <Route path="/performer-profile" element={<PerformerProfile />} />
         <Route path="/recruiter" element={<RecruiterDashboard />} />
         <Route path="/users" element={<Users />} />
+      </Route>
+      <Route element={<PerformerMobileLayout />}>
+        <Route path="/performer-schedule" element={<PerformerShifts />} />
+        <Route path="/performer-knowledge" element={<KnowledgeBase />} />
+        <Route path="/performer-stripchat-view" element={<PerformerStripchatView />} />
+        <Route path="/performer-upload" element={<PerformerUpload />} />
+        <Route path="/performer-support" element={<SupportContact />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
