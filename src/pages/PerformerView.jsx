@@ -210,6 +210,39 @@ export default function PerformerView() {
           )}
         </Section>
 
+        {/* Photos */}
+        {(performer.profilePhoto || performer.idFront || performer.idBack || performer.faceId) && (
+          <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
+            <h3 className="text-sm font-semibold text-foreground mb-4">Photos & ID</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {performer.profilePhoto && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Profile Photo</p>
+                  <img src={performer.profilePhoto} alt="Profile" className="w-full aspect-square object-cover rounded-lg border border-border" />
+                </div>
+              )}
+              {performer.idFront && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">ID Front</p>
+                  <img src={performer.idFront} alt="ID Front" className="w-full aspect-square object-cover rounded-lg border border-border" />
+                </div>
+              )}
+              {performer.idBack && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">ID Back</p>
+                  <img src={performer.idBack} alt="ID Back" className="w-full aspect-square object-cover rounded-lg border border-border" />
+                </div>
+              )}
+              {performer.faceId && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">Face + ID</p>
+                  <img src={performer.faceId} alt="Face + ID" className="w-full aspect-square object-cover rounded-lg border border-border" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Tasks */}
         <div className="lg:col-span-2">
           <PerformerTasks performer={performer} />
