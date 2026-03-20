@@ -23,6 +23,8 @@ export default function Payouts() {
 
   // Summary state
   const [stripchatProfiles, setStripchatProfiles] = useState([]);
+  const [selectedPerformers, setSelectedPerformers] = useState([]);
+  const [profileSearch, setProfileSearch] = useState('');
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [summaryRows, setSummaryRows] = useState([]);
@@ -50,18 +52,15 @@ export default function Payouts() {
     setLoading(false);
   };
 
-  // Fetch earnings from Stripchat API for all active performers in the date range
+  // Fetch earnings from Stripchat API for selected performers in the date range
   const handleFetchEarnings = async () => {
     if (!periodStart || !periodEnd) { toast.error('Both Period Start and End are required'); return; }
     if (periodStart > periodEnd) { toast.error('Period Start must be before Period End'); return; }
-
-    const activeProfiles = stripchatProfiles.filter(p => p.stageName && p.status === 'active');
-    if (activeProfiles.length === 0) { toast.error('No active Stripchat profiles found'); return; }
+    if (selectedPerformers.length === 0) { toast.error('Please select at least one performer'); return; }
 
     setFetchingEarnings(true);
     setSummaryRows([]);
 
-    // Fetch all payout records for this period to compute already-paid amounts
     const allPayouts = await base44.entities.Payout.list();
     const periodPayouts = allPayouts.filter(p => {
       if (!p.date) return false;
@@ -69,6 +68,7 @@ export default function Payouts() {
       return d >= periodStart && d <= periodEnd;
     });
 
+    const activeProfiles = stripchatProfiles.filter(p => selectedPerformers.includes(p.stageName));
     const rows = [];
     for (const profile of activeProfiles) {
       try {
@@ -94,7 +94,7 @@ export default function Payouts() {
 
     setSummaryRows(rows);
     setFetchingEarnings(false);
-    toast.success(`Fetched earnings for ${rows.length} performers`);
+    toast.success(`Fetched earnings for ${rows.length} performer(s)`);
   };
 
   const handleMarkCyclePaid = async (row) => {
@@ -175,6 +175,59 @@ export default function Payouts() {
               <TrendingUp className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Fetch Earnings from Stripchat API</h3>
             </div>
+
+            {/* Performer multi-select */}
+            <div className="mb-4">
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Select Performers *</Label>
+              <div className="border border-border rounded-lg bg-secondary overflow-hidden">
+                <div className="p-2 border-b border-border">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search performers..."
+                      value={profileSearch}
+                      onChange={e => setProfileSearch(e.target.value)}
+                      className="pl-7 h-8 text-xs bg-card border-border"
+                    />
+                  </div>
+                </div>
+                <div className="max-h-44 overflow-y-auto p-1">
+                  {stripchatProfiles
+                    .filter(p => p.stageName && (!profileSearch || p.stageName.toLowerCase().includes(profileSearch.toLowerCase())))
+                    .map(p => (
+                      <label key={p.stageName} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-card cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedPerformers.includes(p.stageName)}
+                          onChange={e => {
+                            setSelectedPerformers(prev =>
+                              e.target.checked ? [...prev, p.stageName] : prev.filter(n => n !== p.stageName)
+                            );
+                          }}
+                          className="accent-primary"
+                        />
+                        <span className="text-sm text-foreground">{p.stageName}</span>
+                        <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
+                          p.status === 'active' ? 'bg-green-500/10 text-green-400' :
+                          p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
+                          'bg-yellow-500/10 text-yellow-400'
+                        }`}>{p.status || 'pending'}</span>
+                      </label>
+                    ))
+                  }
+                  {stripchatProfiles.filter(p => p.stageName).length === 0 && (
+                    <p className="text-xs text-muted-foreground px-3 py-2">No Stripchat profiles found.</p>
+                  )}
+                </div>
+                {selectedPerformers.length > 0 && (
+                  <div className="px-3 py-2 border-t border-border flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{selectedPerformers.length} selected</span>
+                    <button onClick={() => setSelectedPerformers([])} className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="flex flex-wrap gap-3 items-end">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5 block">Period Start *</Label>
@@ -186,11 +239,11 @@ export default function Payouts() {
               </div>
               <Button onClick={handleFetchEarnings} disabled={fetchingEarnings} className="bg-primary text-primary-foreground h-9">
                 {fetchingEarnings ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-                {fetchingEarnings ? 'Fetching...' : 'Fetch All Earnings'}
+                {fetchingEarnings ? 'Fetching...' : 'Fetch Earnings'}
               </Button>
             </div>
             {fetchingEarnings && (
-              <p className="text-xs text-muted-foreground mt-3">Fetching earnings for all active performers — this may take a moment…</p>
+              <p className="text-xs text-muted-foreground mt-3">Fetching earnings for {selectedPerformers.length} performer(s) — this may take a moment…</p>
             )}
           </div>
 
