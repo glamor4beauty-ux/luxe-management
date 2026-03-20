@@ -120,6 +120,10 @@ export default function PerformerView() {
             </div>
           )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <InfoRow label="Email" value={performer.email} />
+            <InfoRow label="Phone" value={performer.phone} />
+            <InfoRow label="Recruiter" value={performer.recruiterName} />
+            <InfoRow label="Applying For" value={performer.applyingFor} />
             <InfoRow label="City" value={performer.city} />
             <InfoRow label="State" value={performer.state} />
             <InfoRow label="Country" value={performer.country} />
