@@ -1,9 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Loader2, TrendingUp, DollarSign, Search, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { toast } from "sonner";
 
 const EARNINGS_KEYS = [
@@ -30,27 +25,9 @@ const EARNINGS_KEYS = [
 export default function EarningsLookup({ profiles }) {
   const [performers, setPerformers] = useState([]);
   const [modelUsername, setModelUsername] = useState('');
-  const [search, setSearch] = useState('');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [periodStart, setPeriodStart] = useState('');
-  const [periodEnd, setPeriodEnd] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
     base44.entities.Performer.list().then(setPerformers);
-  }, []);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   // Build merged list: stripchat profiles joined with performer real names
@@ -61,19 +38,6 @@ export default function EarningsLookup({ profiles }) {
       const realName = performer ? `${performer.firstName} ${performer.lastName}`.trim() : '';
       return { stageName: p.stageName, realName };
     });
-
-  const filtered = modelOptions.filter(m => {
-    const q = search.toLowerCase();
-    return !q || m.stageName.toLowerCase().includes(q) || m.realName.toLowerCase().includes(q);
-  });
-
-  const selectedModel = modelOptions.find(m => m.stageName === modelUsername);
-
-  const handleSelect = (stageName) => {
-    setModelUsername(stageName);
-    setSearch('');
-    setDropdownOpen(false);
-  };
 
   const handleFetch = async () => {
     if (!modelUsername) { toast.error('Please select a model'); return; }
@@ -110,56 +74,31 @@ export default function EarningsLookup({ profiles }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-        {/* Searchable model picker */}
-        <div ref={dropdownRef} className="relative">
+        {/* Model checklist */}
+        <div className="sm:col-span-3">
           <Label className="text-xs text-muted-foreground mb-1.5 block">Model *</Label>
-          <button
-            type="button"
-            onClick={() => setDropdownOpen(o => !o)}
-            className="w-full flex items-center justify-between bg-secondary border border-border text-foreground h-9 px-3 rounded-md text-sm"
-          >
-            <span className={modelUsername ? 'text-foreground' : 'text-muted-foreground'}>
-              {selectedModel
-                ? selectedModel.realName
-                  ? `${selectedModel.stageName} (${selectedModel.realName})`
-                  : selectedModel.stageName
-                : 'Select model...'}
-            </span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-          </button>
-
-          {dropdownOpen && (
-            <div className="absolute z-50 top-full mt-1 w-full bg-card border border-border rounded-md shadow-lg overflow-hidden">
-              <div className="p-2 border-b border-border">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input
-                    autoFocus
-                    placeholder="Search by name or stage name..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="pl-7 h-8 text-xs bg-secondary border-border"
-                  />
-                </div>
+          <div className="border border-border rounded-lg bg-secondary overflow-hidden">
+            {modelOptions.length === 0 ? (
+              <p className="text-xs text-muted-foreground px-3 py-3">No Stripchat profiles found.</p>
+            ) : (
+              <div className="max-h-48 overflow-y-auto p-1">
+                {modelOptions.map(m => (
+                  <label key={m.stageName} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-card cursor-pointer">
+                    <input
+                      type="radio"
+                      name="modelUsername"
+                      value={m.stageName}
+                      checked={modelUsername === m.stageName}
+                      onChange={() => setModelUsername(m.stageName)}
+                      className="accent-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">{m.stageName}</span>
+                    {m.realName && <span className="text-xs text-muted-foreground">({m.realName})</span>}
+                  </label>
+                ))}
               </div>
-              <div className="max-h-48 overflow-y-auto">
-                {filtered.length === 0 ? (
-                  <p className="text-xs text-muted-foreground px-3 py-2">No models found</p>
-                ) : (
-                  filtered.map(m => (
-                    <button
-                      key={m.stageName}
-                      onClick={() => handleSelect(m.stageName)}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary transition-colors ${modelUsername === m.stageName ? 'bg-primary/10 text-primary' : 'text-foreground'}`}
-                    >
-                      <span className="font-medium">{m.stageName}</span>
-                      {m.realName && <span className="text-xs text-muted-foreground ml-2">({m.realName})</span>}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Period Start */}
