@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { Users, FileText, Calendar, Monitor, ArrowRight } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, ArrowRight, DollarSign, CheckCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const StatCard = ({ icon: Icon, label, count, to, color }) => (
   <Link to={to} className="group bg-card border border-border rounded-xl p-6 hover:border-primary/30 transition-all duration-300">
@@ -18,15 +20,18 @@ const StatCard = ({ icon: Icon, label, count, to, color }) => (
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ performers: 0, memos: 0, calendars: 0, stripchats: 0 });
+  const [unpaidPayouts, setUnpaidPayouts] = useState([]);
+  const [markingAll, setMarkingAll] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [performers, memos, calendars, stripchats] = await Promise.all([
+      const [performers, memos, calendars, stripchats, payouts] = await Promise.all([
         base44.entities.Performer.list(),
         base44.entities.Memo.list(),
         base44.entities.Calendar.list(),
         base44.entities.Stripchat.list(),
+        base44.entities.Payout.filter({ status: 'unpaid' }),
       ]);
       setStats({
         performers: performers.length,
@@ -34,10 +39,19 @@ export default function Dashboard() {
         calendars: calendars.length,
         stripchats: stripchats.length,
       });
+      setUnpaidPayouts(payouts);
       setLoading(false);
     }
     load();
   }, []);
+
+  const handleMarkAllPaid = async () => {
+    setMarkingAll(true);
+    await Promise.all(unpaidPayouts.map(p => base44.entities.Payout.update(p.id, { status: 'paid' })));
+    setUnpaidPayouts([]);
+    toast.success('All payouts marked as paid!');
+    setMarkingAll(false);
+  };
 
   if (loading) {
     return (
@@ -47,12 +61,36 @@ export default function Dashboard() {
     );
   }
 
+  const totalUnpaid = unpaidPayouts.reduce((sum, p) => sum + (p.amount || 0), 0);
+
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Overview of your management system</p>
       </div>
+
+      {/* Unpaid Payouts Banner */}
+      {unpaidPayouts.length > 0 && (
+        <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <DollarSign className="h-8 w-8 text-red-400" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">{unpaidPayouts.length} Unpaid Payout{unpaidPayouts.length !== 1 ? 's' : ''}</p>
+              <p className="text-2xl font-bold text-red-400">${totalUnpaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} due</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Link to="/payouts">
+              <Button variant="outline" size="sm" className="border-red-500/30 text-red-400 hover:bg-red-500/10">View All</Button>
+            </Link>
+            <Button size="sm" onClick={handleMarkAllPaid} disabled={markingAll} className="bg-green-600 hover:bg-green-700 text-white">
+              {markingAll ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</span> : <span className="flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Mark All Paid</span>}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Performers" count={stats.performers} to="/performers" color="bg-primary/10 text-primary" />
         <StatCard icon={FileText} label="Memos" count={stats.memos} to="/memos" color="bg-chart-2/10 text-chart-2" />
