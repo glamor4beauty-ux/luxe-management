@@ -75,12 +75,16 @@ const COL_MAP = {
   memo: ['memo', 'Memo'],
 };
 
+const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'stageName'];
+
 function mapRow(row) {
   const result = {};
   for (const [field, aliases] of Object.entries(COL_MAP)) {
     const match = aliases.find(a => row[a] !== undefined);
     if (match && row[match]) result[field] = row[match];
   }
+  // Ensure required fields always have a value (empty string fallback)
+  REQUIRED_FIELDS.forEach(f => { if (!result[f]) result[f] = ''; });
   return result;
 }
 
