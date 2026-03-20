@@ -24,12 +24,6 @@ const StatCard = ({ icon: Icon, label, count, to, color }) => (
 
 const COLORS = ['hsl(42,80%,55%)', 'hsl(200,70%,50%)', 'hsl(160,60%,45%)', 'hsl(280,65%,60%)', 'hsl(340,75%,55%)'];
 
-function getWeekLabel(date) {
-  const d = new Date(date);
-  const week = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 604800000);
-  return `W${week + 1}`;
-}
-
 export default function Dashboard() {
   const [stats, setStats] = useState({ performers: 0, memos: 0, calendars: 0, stripchats: 0 });
   const [unpaidPayouts, setUnpaidPayouts] = useState([]);
@@ -39,6 +33,63 @@ export default function Dashboard() {
   const [platformData, setPlatformData] = useState([]);
   const [activePerformers, setActivePerformers] = useState(0);
   const [pendingTasks, setPendingTasks] = useState(0);
+
+  useEffect(() => {
+    async function load() {
+      const [performers, memos, calendars, stripchats, payouts, tasks] = await Promise.all([
+        base44.entities.Performer.list(),
+        base44.entities.Memo.list(),
+        base44.entities.Calendar.list(),
+        base44.entities.Stripchat.list(),
+        base44.entities.Payout.filter({ status: 'unpaid' }),
+        base44.entities.Task.list(),
+      ]);
+
+      setStats({
+        performers: performers.length,
+        memos: memos.length,
+        calendars: calendars.length,
+        stripchats: stripchats.length,
+      });
+      setUnpaidPayouts(payouts);
+      setPendingTasks(tasks.filter(t => t.status === 'pending' || t.status === 'in_progress').length);
+
+      // Active performers with active Stripchat profile
+      setActivePerformers(new Set(stripchats.filter(s => s.status === 'active').map(s => s.stageName)).size);
+
+      // Signups per week (last 8 weeks)
+      const now = new Date();
+      const weekBoundaries = Array.from({ length: 9 }, (_, i) => {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 7 * (8 - i));
+        return d;
+      });
+      const weekCounts = weekBoundaries.slice(0, 8).map((weekStart, i) => {
+        const weekEnd = weekBoundaries[i + 1];
+        const count = performers.filter(p => {
+          const cd = new Date(p.created_date);
+          return cd >= weekStart && cd < weekEnd;
+        }).length;
+        const label = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return { week: label, signups: count };
+      });
+      setSignupData(weekCounts);
+
+      // Platform breakdown by stripchat status
+      const statusCounts = {};
+      stripchats.forEach(s => {
+        const status = s.status || 'unknown';
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      });
+      setPlatformData(Object.entries(statusCounts).map(([name, value]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value,
+      })));
+
+      setLoading(false);
+    }
+    load();
+  }, []);
 
   const handleMarkAllPaid = async () => {
     setMarkingAll(true);
@@ -80,12 +131,15 @@ export default function Dashboard() {
               <Button variant="outline" size="sm" className="border-red-500/30 text-red-400 hover:bg-red-500/10">View All</Button>
             </Link>
             <Button size="sm" onClick={handleMarkAllPaid} disabled={markingAll} className="bg-green-600 hover:bg-green-700 text-white">
-              {markingAll ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</span> : <span className="flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Mark All Paid</span>}
+              {markingAll
+                ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</span>
+                : <span className="flex items-center gap-2"><CheckCircle className="h-4 w-4" /> Mark All Paid</span>}
             </Button>
           </div>
         </div>
       )}
 
+      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={Users} label="Performers" count={stats.performers} to="/performers" color="bg-primary/10 text-primary" />
         <StatCard icon={FileText} label="Memos" count={stats.memos} to="/memos" color="bg-chart-2/10 text-chart-2" />
@@ -123,7 +177,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-1">New Performer Signups</h3>
           <p className="text-xs text-muted-foreground mb-4">Per week over the last 8 weeks</p>
-          {signupData.length > 0 ? (
+          {signupData.some(d => d.signups > 0) ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={signupData} barSize={28}>
                 <XAxis dataKey="week" tick={{ fontSize: 11, fill: 'hsl(220 10% 55%)' }} axisLine={false} tickLine={false} />
@@ -137,7 +191,7 @@ export default function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">No signup data yet</div>
+            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">No signup data in the last 8 weeks</div>
           )}
         </div>
 
