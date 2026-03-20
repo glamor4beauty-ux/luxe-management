@@ -10,6 +10,7 @@ import PerformerMobileLayout from './components/performer/PerformerMobileLayout'
 import Dashboard from './pages/Dashboard';
 import PerformerSchedule from './pages/PerformerSchedule';
 import PerformerStripchatView from './pages/PerformerStripchatView';
+import CustomAuthForm from './components/CustomAuthForm';
 import PerformerUpload from './pages/PerformerUpload';
 import Performers from './pages/Performers';
 import PerformerForm from './pages/PerformerForm';
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/auth" element={<CustomAuthForm />} />
       <Route element={<Layout />}>
         <Route path="/" element={getLandingPage()} />
         <Route path="/performers" element={<Performers />} />
