@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Mail, Loader2 } from 'lucide-react';
-import { useAuth } from '@/lib/AuthContext';
+import { Mail, Loader2, Save } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,13 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 
 export default function Users() {
-  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [inviting, setInviting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer' });
+  const [editingData, setEditingData] = useState({});
 
   useEffect(() => {
     loadUsers();
@@ -48,6 +47,33 @@ export default function Users() {
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
     );
+  };
+
+  const handleEditChange = (userId, field, value) => {
+    setEditingData(prev => ({
+      ...prev,
+      [userId]: { ...prev[userId], [field]: value }
+    }));
+  };
+
+  const handleSaveUser = async (userId) => {
+    const data = editingData[userId];
+    if (!data) return;
+    try {
+      await base44.asServiceRole.entities.User.update(userId, data);
+      toast.success('User updated');
+      setEditingData(prev => ({ ...prev, [userId]: undefined }));
+      loadUsers();
+    } catch (e) {
+      toast.error('Failed to update user');
+    }
+  };
+
+  const isUserEdited = (userId) => {
+    const data = editingData[userId];
+    if (!data) return false;
+    const user = users.find(u => u.id === userId);
+    return data.full_name !== user?.full_name || data.email !== user?.email || data.password !== user?.password;
   };
 
   const handleSendInvite = async () => {
@@ -151,10 +177,37 @@ export default function Users() {
                           onChange={() => toggleUserSelect(u.id)}
                         />
                       </td>
-                      <td className="px-4 py-3 text-foreground font-medium">{u.full_name}</td>
+                      <td className="px-4 py-3">
+                        <Input
+                          value={editingData[u.id]?.full_name ?? u.full_name}
+                          onChange={(e) => handleEditChange(u.id, 'full_name', e.target.value)}
+                          className="h-8 text-xs bg-secondary border-border"
+                        />
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{u.stageName || '-'}</td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{u.email}</td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs font-mono">{u.password ? '••••••••' : 'none'}</td>
+                      <td className="px-4 py-3">
+                        <Input
+                          value={editingData[u.id]?.email ?? u.email}
+                          onChange={(e) => handleEditChange(u.id, 'email', e.target.value)}
+                          className="h-8 text-xs bg-secondary border-border"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="text"
+                            value={editingData[u.id]?.password ?? u.password ?? ''}
+                            onChange={(e) => handleEditChange(u.id, 'password', e.target.value)}
+                            placeholder="Set password"
+                            className="h-8 text-xs bg-secondary border-border flex-1"
+                          />
+                          {isUserEdited(u.id) && (
+                            <Button size="icon" className="h-8 w-8 bg-green-600 hover:bg-green-700" onClick={() => handleSaveUser(u.id)}>
+                              <Save className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
