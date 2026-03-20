@@ -176,52 +176,68 @@ export default function Payouts() {
               <h3 className="text-sm font-semibold text-foreground">Fetch Earnings from Stripchat API</h3>
             </div>
 
-            {/* Performer multi-select */}
+            {/* Performer multi-select table */}
             <div className="mb-4">
               <Label className="text-xs text-muted-foreground mb-1.5 block">Select Performers *</Label>
-              <div className="border border-border rounded-lg bg-secondary overflow-hidden">
+              <div className="border border-border rounded-lg overflow-hidden">
                 {stripchatProfiles.filter(p => p.stageName).length === 0 ? (
                   <p className="text-xs text-muted-foreground px-3 py-3">No Stripchat profiles found.</p>
                 ) : (
                   <>
-                    <div className="px-3 py-2 border-b border-border flex items-center justify-between">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="accent-primary"
-                          checked={selectedPerformers.length === stripchatProfiles.filter(p => p.stageName).length}
-                          onChange={e => {
-                            const all = stripchatProfiles.filter(p => p.stageName).map(p => p.stageName);
-                            setSelectedPerformers(e.target.checked ? all : []);
-                          }}
-                        />
-                        <span className="text-xs font-medium text-muted-foreground">Select All</span>
-                      </label>
-                      {selectedPerformers.length > 0 && (
-                        <span className="text-xs text-primary">{selectedPerformers.length} selected</span>
-                      )}
-                    </div>
-                    <div className="max-h-52 overflow-y-auto p-1">
-                      {stripchatProfiles.filter(p => p.stageName).map(p => (
-                        <label key={p.stageName} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-card cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedPerformers.includes(p.stageName)}
-                            onChange={e => {
-                              setSelectedPerformers(prev =>
-                                e.target.checked ? [...prev, p.stageName] : prev.filter(n => n !== p.stageName)
-                              );
-                            }}
-                            className="accent-primary"
-                          />
-                          <span className="text-sm text-foreground">{p.stageName}</span>
-                          <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
-                            p.status === 'active' ? 'bg-green-500/10 text-green-400' :
-                            p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
-                            'bg-yellow-500/10 text-yellow-400'
-                          }`}>{p.status || 'pending'}</span>
-                        </label>
-                      ))}
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-secondary border-b border-border">
+                          <th className="px-4 py-2 w-8">
+                            <input
+                              type="checkbox"
+                              className="accent-primary"
+                              checked={selectedPerformers.length === stripchatProfiles.filter(p => p.stageName).length}
+                              onChange={e => {
+                                const all = stripchatProfiles.filter(p => p.stageName).map(p => p.stageName);
+                                setSelectedPerformers(e.target.checked ? all : []);
+                              }}
+                            />
+                          </th>
+                          <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stage Name</th>
+                          <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                          {selectedPerformers.length > 0 && (
+                            <th className="text-right px-4 py-2 text-xs text-primary">{selectedPerformers.length} selected</th>
+                          )}
+                        </tr>
+                      </thead>
+                    </table>
+                    <div className="max-h-52 overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <tbody>
+                          {stripchatProfiles.filter(p => p.stageName).map(p => (
+                            <tr
+                              key={p.stageName}
+                              className="border-b border-border/50 hover:bg-secondary/40 cursor-pointer transition-colors"
+                              onClick={() => setSelectedPerformers(prev =>
+                                prev.includes(p.stageName) ? prev.filter(n => n !== p.stageName) : [...prev, p.stageName]
+                              )}
+                            >
+                              <td className="px-4 py-2.5 w-8">
+                                <input
+                                  type="checkbox"
+                                  className="accent-primary"
+                                  checked={selectedPerformers.includes(p.stageName)}
+                                  onChange={() => {}}
+                                />
+                              </td>
+                              <td className="px-4 py-2.5 font-medium text-foreground">{p.stageName}</td>
+                              <td className="px-4 py-2.5">
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                  p.status === 'active' ? 'bg-green-500/10 text-green-400' :
+                                  p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
+                                  'bg-yellow-500/10 text-yellow-400'
+                                }`}>{p.status || 'pending'}</span>
+                              </td>
+                              {selectedPerformers.length > 0 && <td />}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </>
                 )}
