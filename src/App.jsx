@@ -16,6 +16,11 @@ import StripchatPage from './pages/StripchatPage';
 import Payouts from './pages/Payouts.jsx';
 import Tasks from './pages/Tasks';
 import Register from './pages/Register';
+import PerformerDashboard from './pages/PerformerDashboard';
+import PerformerShifts from './pages/PerformerShifts';
+import SupportContact from './pages/SupportContact';
+import KnowledgeBase from './pages/KnowledgeBase';
+import PerformerProfile from './pages/PerformerProfile';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -55,6 +60,11 @@ const AuthenticatedApp = () => {
         <Route path="/payouts" element={<Payouts />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/performer" element={<PerformerDashboard />} />
+        <Route path="/performer-shifts" element={<PerformerShifts />} />
+        <Route path="/support" element={<SupportContact />} />
+        <Route path="/knowledge-base" element={<KnowledgeBase />} />
+        <Route path="/performer-profile" element={<PerformerProfile />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
