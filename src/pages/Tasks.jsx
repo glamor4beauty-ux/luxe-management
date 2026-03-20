@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Search, Trash2, CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
+import { Plus, Search, Trash2, CheckCircle, Clock, AlertCircle, XCircle, User } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,11 +26,14 @@ const PRIORITY_COLOR = {
 const EMPTY_FORM = { title: '', description: '', performerStageName: '', assignedTo: '', deadline: '', status: 'pending', priority: 'medium', notes: '' };
 
 export default function Tasks() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [performers, setPerformers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editId, setEditId] = useState(null);
@@ -37,12 +41,14 @@ export default function Tasks() {
 
   const load = async () => {
     setLoading(true);
-    const [t, p] = await Promise.all([
+    const [t, p, u] = await Promise.all([
       base44.entities.Task.list('-created_date'),
       base44.entities.Performer.list(),
+      base44.entities.User.list(),
     ]);
     setTasks(t);
     setPerformers(p);
+    setUsers(u);
     setLoading(false);
   };
 
@@ -87,9 +93,10 @@ export default function Tasks() {
 
   const filtered = tasks.filter(t => {
     const q = search.toLowerCase();
-    const matchSearch = !q || t.title?.toLowerCase().includes(q) || t.performerStageName?.toLowerCase().includes(q);
+    const matchSearch = !q || t.title?.toLowerCase().includes(q) || t.performerStageName?.toLowerCase().includes(q) || t.assignedTo?.toLowerCase().includes(q);
     const matchStatus = statusFilter === 'all' || t.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchAssignee = assigneeFilter === 'all' || t.assignedTo === assigneeFilter || (assigneeFilter === 'me' && t.assignedTo === user?.email);
+    return matchSearch && matchStatus && matchAssignee;
   });
 
   const counts = Object.keys(STATUS_CONFIG).reduce((acc, s) => {
@@ -101,12 +108,14 @@ export default function Tasks() {
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
-          <p className="text-sm text-muted-foreground mt-1">{tasks.length} total tasks</p>
+        <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
+        <p className="text-sm text-muted-foreground mt-1">{tasks.length} total tasks</p>
         </div>
+        {user?.role === 'admin' && (
         <Button size="sm" onClick={openNew} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" /> New Task
         </Button>
+        )}
       </div>
 
       {/* Status summary */}
@@ -129,9 +138,22 @@ export default function Tasks() {
         })}
       </div>
 
-      <div className="mb-4 relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search tasks or performers..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 bg-card border-border h-9" />
+      <div className="flex gap-3 mb-4 flex-wrap">
+        <div className="relative flex-1 min-w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search tasks, performers, or assignees..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 bg-card border-border h-9" />
+        </div>
+        {user?.role === 'admin' && (
+          <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+            <SelectTrigger className="bg-card border-border h-9 w-40"><SelectValue /></SelectTrigger>
+            <SelectContent className="bg-card border-border">
+              <SelectItem value="all">All Assignees</SelectItem>
+              {users.filter(u => u.role === 'recruiter').map(u => (
+                <SelectItem key={u.id} value={u.email}>{u.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {loading ? (
@@ -150,17 +172,23 @@ export default function Tasks() {
               <div key={task.id} className="bg-card border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 hover:border-border/70 transition-colors">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-foreground text-sm">{task.title}</span>
-                    {task.priority && (
-                      <span className={`text-xs font-semibold uppercase ${PRIORITY_COLOR[task.priority]}`}>{task.priority}</span>
-                    )}
-                    {isOverdue && <span className="text-xs text-red-400 font-medium">Overdue</span>}
-                  </div>
-                  <div className="flex items-center gap-3 mt-1 flex-wrap">
-                    {task.performerStageName && <span className="text-xs text-primary">@{task.performerStageName}</span>}
-                    {task.deadline && <span className="text-xs text-muted-foreground">Due {new Date(task.deadline).toLocaleDateString()}</span>}
-                    {task.description && <span className="text-xs text-muted-foreground truncate max-w-xs">{task.description}</span>}
-                  </div>
+                      <span className="font-medium text-foreground text-sm">{task.title}</span>
+                      {task.priority && (
+                        <span className={`text-xs font-semibold uppercase ${PRIORITY_COLOR[task.priority]}`}>{task.priority}</span>
+                      )}
+                      {isOverdue && <span className="text-xs text-red-400 font-medium">Overdue</span>}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap text-xs">
+                      {task.assignedTo && (
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          {users.find(u => u.email === task.assignedTo)?.full_name || task.assignedTo}
+                        </span>
+                      )}
+                      {task.performerStageName && <span className="text-primary">@{task.performerStageName}</span>}
+                      {task.deadline && <span className="text-muted-foreground">Due {new Date(task.deadline).toLocaleDateString()}</span>}
+                      {task.description && <span className="text-muted-foreground truncate max-w-xs">{task.description}</span>}
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Select value={task.status} onValueChange={val => handleStatusChange(task, val)}>
@@ -218,15 +246,15 @@ export default function Tasks() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground">Performer</Label>
-                <Select value={form.performerStageName} onValueChange={v => setForm(f => ({ ...f, performerStageName: v }))}>
+                <Label className="text-xs text-muted-foreground">Assign To (Recruiter/Performer)</Label>
+                <Select value={form.assignedTo} onValueChange={v => setForm(f => ({ ...f, assignedTo: v }))}>
                   <SelectTrigger className="bg-secondary border-border mt-1 h-9 text-sm">
-                    <SelectValue placeholder="Select performer" />
+                    <SelectValue placeholder="Select assignee" />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
-                    <SelectItem value={null}>— None —</SelectItem>
-                    {performers.map(p => (
-                      <SelectItem key={p.id} value={p.stageName}>{p.stageName}</SelectItem>
+                    <SelectItem value={null}>— Unassigned —</SelectItem>
+                    {users.filter(u => u.role === 'recruiter' || u.role === 'performer').map(u => (
+                      <SelectItem key={u.id} value={u.email}>{u.full_name} ({u.role})</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -235,6 +263,20 @@ export default function Tasks() {
                 <Label className="text-xs text-muted-foreground">Deadline</Label>
                 <Input type="datetime-local" value={form.deadline} onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} className="bg-secondary border-border mt-1 h-9 text-sm" />
               </div>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Performer (Optional - for context)</Label>
+              <Select value={form.performerStageName} onValueChange={v => setForm(f => ({ ...f, performerStageName: v }))}>
+                <SelectTrigger className="bg-secondary border-border mt-1 h-9 text-sm">
+                  <SelectValue placeholder="Select performer" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value={null}>— None —</SelectItem>
+                  {performers.map(p => (
+                    <SelectItem key={p.id} value={p.stageName}>{p.stageName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
