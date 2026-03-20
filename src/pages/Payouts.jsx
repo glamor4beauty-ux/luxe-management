@@ -180,16 +180,50 @@ export default function Payouts() {
             <div className="mb-4">
               <Label className="text-xs text-muted-foreground mb-1.5 block">Select Performers *</Label>
               <div className="border border-border rounded-lg bg-secondary overflow-hidden">
-                <div className="max-h-56 overflow-y-auto p-1">
-                  {stripchatProfiles.filter(p => p.stageName).length === 0 && (
-                    <p className="text-xs text-muted-foreground px-3 py-2">No Stripchat profiles found.</p>
-                  )}
-                </div>
-                {selectedPerformers.length > 0 && (
-                  <div className="px-3 py-2 border-t border-border flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{selectedPerformers.length} selected</span>
-                    <button onClick={() => setSelectedPerformers([])} className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
-                  </div>
+                {stripchatProfiles.filter(p => p.stageName).length === 0 ? (
+                  <p className="text-xs text-muted-foreground px-3 py-3">No Stripchat profiles found.</p>
+                ) : (
+                  <>
+                    <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="accent-primary"
+                          checked={selectedPerformers.length === stripchatProfiles.filter(p => p.stageName).length}
+                          onChange={e => {
+                            const all = stripchatProfiles.filter(p => p.stageName).map(p => p.stageName);
+                            setSelectedPerformers(e.target.checked ? all : []);
+                          }}
+                        />
+                        <span className="text-xs font-medium text-muted-foreground">Select All</span>
+                      </label>
+                      {selectedPerformers.length > 0 && (
+                        <span className="text-xs text-primary">{selectedPerformers.length} selected</span>
+                      )}
+                    </div>
+                    <div className="max-h-52 overflow-y-auto p-1">
+                      {stripchatProfiles.filter(p => p.stageName).map(p => (
+                        <label key={p.stageName} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-card cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedPerformers.includes(p.stageName)}
+                            onChange={e => {
+                              setSelectedPerformers(prev =>
+                                e.target.checked ? [...prev, p.stageName] : prev.filter(n => n !== p.stageName)
+                              );
+                            }}
+                            className="accent-primary"
+                          />
+                          <span className="text-sm text-foreground">{p.stageName}</span>
+                          <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${
+                            p.status === 'active' ? 'bg-green-500/10 text-green-400' :
+                            p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
+                            'bg-yellow-500/10 text-yellow-400'
+                          }`}>{p.status || 'pending'}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
