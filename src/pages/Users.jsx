@@ -14,7 +14,9 @@ export default function Users() {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [inviting, setInviting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer' });
+  const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', role: 'performer' });
   const [editingData, setEditingData] = useState({});
 
   useEffect(() => {
@@ -73,7 +75,28 @@ export default function Users() {
     const data = editingData[userId];
     if (!data) return false;
     const user = users.find(u => u.id === userId);
-    return data.full_name !== user?.full_name || data.email !== user?.email || data.password !== user?.password;
+    return data.full_name !== user?.full_name || data.email !== user?.email || data.password !== user?.password || data.stageName !== user?.stageName;
+  };
+
+  const handleAddUser = async () => {
+    if (!addForm.full_name || !addForm.email || !addForm.password) {
+      toast.error('All fields required');
+      return;
+    }
+    try {
+      await base44.asServiceRole.entities.User.create({
+        full_name: addForm.full_name,
+        email: addForm.email,
+        password: addForm.password,
+        role: addForm.role
+      });
+      toast.success('User added');
+      setAddDialogOpen(false);
+      setAddForm({ full_name: '', email: '', password: '', role: 'performer' });
+      loadUsers();
+    } catch (e) {
+      toast.error('Failed to add user');
+    }
   };
 
   const handleSendInvite = async () => {
@@ -82,8 +105,13 @@ export default function Users() {
       return;
     }
     try {
-      await base44.users.inviteUser(inviteForm.email, inviteForm.role);
-      toast.success('Invite sent');
+      const password = Math.random().toString(36).slice(-8);
+      await base44.integrations.Core.SendEmail({
+        to: inviteForm.email,
+        subject: 'Welcome to LUXE Management Systems - Your Login Credentials',
+        body: `Welcome to LUXE Management Systems!\n\nHere are your login details:\n\nEmail: ${inviteForm.email}\nPassword: ${password}\nRole: ${inviteForm.role}\n\nPlease log in at the app and change your password immediately.\n\nIf you have any questions, contact support.`
+      });
+      toast.success('Invite email sent with password');
       setDialogOpen(false);
       setInviteForm({ email: '', role: 'performer' });
     } catch (e) {
@@ -96,27 +124,58 @@ export default function Users() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Users</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage user accounts and send invites</p>
+          <p className="text-sm text-muted-foreground mt-1">Manage user accounts</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)} className="bg-primary text-primary-foreground">
-          <Mail className="h-4 w-4 mr-2" /> Invite User
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setAddDialogOpen(true)} className="bg-primary text-primary-foreground">
+            Add User
+          </Button>
+          <Button onClick={() => setDialogOpen(true)} variant="outline" className="border-border">
+            <Mail className="h-4 w-4 mr-2" /> Invite User
+          </Button>
+        </div>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
-            <DialogTitle>Invite User</DialogTitle>
+            <DialogTitle>Add User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <Label className="text-xs text-muted-foreground">Full Name</Label>
+              <Input 
+                value={addForm.full_name} 
+                onChange={e => setAddForm(f => ({ ...f, full_name: e.target.value }))} 
+                placeholder="John Doe" 
+                className="bg-secondary border-border text-foreground h-9 mt-1" 
+              />
+            </div>
+            <div>
               <Label className="text-xs text-muted-foreground">Email</Label>
-              <Input value={inviteForm.email} onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} placeholder="user@example.com" className="bg-secondary border-border text-foreground h-9 mt-1" />
+              <Input 
+                value={addForm.email} 
+                onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} 
+                placeholder="user@example.com" 
+                className="bg-secondary border-border text-foreground h-9 mt-1" 
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Password</Label>
+              <Input 
+                value={addForm.password} 
+                onChange={e => setAddForm(f => ({ ...f, password: e.target.value }))} 
+                placeholder="Set password" 
+                type="password" 
+                className="bg-secondary border-border text-foreground h-9 mt-1" 
+              />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Role</Label>
-              <Select value={inviteForm.role} onValueChange={v => setInviteForm(f => ({ ...f, role: v }))}>
-                <SelectTrigger className="bg-secondary border-border text-foreground h-9 mt-1"><SelectValue /></SelectTrigger>
+              <Select value={addForm.role} onValueChange={v => setAddForm(f => ({ ...f, role: v }))}>
+                <SelectTrigger className="bg-secondary border-border text-foreground h-9 mt-1">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent className="bg-card border-border">
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="recruiter">Recruiter</SelectItem>
@@ -126,15 +185,57 @@ export default function Users() {
               </Select>
             </div>
             <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAddDialogOpen(false)} className="border-border">Cancel</Button>
+              <Button onClick={handleAddUser} className="bg-primary text-primary-foreground">Add User</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Invite User</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs text-muted-foreground">Email</Label>
+              <Input 
+                value={inviteForm.email} 
+                onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} 
+                placeholder="user@example.com" 
+                className="bg-secondary border-border text-foreground h-9 mt-1" 
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Role</Label>
+              <Select value={inviteForm.role} onValueChange={v => setInviteForm(f => ({ ...f, role: v }))}>
+                <SelectTrigger className="bg-secondary border-border text-foreground h-9 mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="recruiter">Recruiter</SelectItem>
+                  <SelectItem value="performer">Performer</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-xs text-muted-foreground bg-secondary/50 rounded p-2">An invite email with login instructions and a temporary password will be sent.</p>
+            <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-border">Cancel</Button>
-              <Button onClick={handleSendInvite} className="bg-primary text-primary-foreground"><Mail className="h-4 w-4 mr-2" />Send Invite</Button>
+              <Button onClick={handleSendInvite} className="bg-primary text-primary-foreground">
+                <Mail className="h-4 w-4 mr-2" />Send Invite
+              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {loading ? (
-        <div className="flex items-center justify-center h-40"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>
+        <div className="flex items-center justify-center h-40">
+          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
       ) : users.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">No users yet.</div>
       ) : (
