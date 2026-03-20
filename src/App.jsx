@@ -21,9 +21,18 @@ import PerformerShifts from './pages/PerformerShifts';
 import SupportContact from './pages/SupportContact';
 import KnowledgeBase from './pages/KnowledgeBase';
 import PerformerProfile from './pages/PerformerProfile';
+import RecruiterDashboard from './pages/RecruiterDashboard';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+
+  // Role-based landing page redirect
+  const getLandingPage = () => {
+    if (!user) return <Dashboard />;
+    if (user.role === 'recruiter') return <RecruiterDashboard />;
+    if (user.role === 'performer') return <PerformerDashboard />;
+    return <Dashboard />; // admin/default
+  };
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -49,7 +58,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={getLandingPage()} />
         <Route path="/performers" element={<Performers />} />
         <Route path="/performers/new" element={<PerformerForm />} />
         <Route path="/performers/:id" element={<PerformerView />} />
@@ -65,6 +74,7 @@ const AuthenticatedApp = () => {
         <Route path="/support" element={<SupportContact />} />
         <Route path="/knowledge-base" element={<KnowledgeBase />} />
         <Route path="/performer-profile" element={<PerformerProfile />} />
+        <Route path="/recruiter" element={<RecruiterDashboard />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
