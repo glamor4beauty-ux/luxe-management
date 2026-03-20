@@ -34,11 +34,9 @@ export default function PerformerUpload() {
       setUploading(true);
       try {
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        const updates = {};
-        updates[type] = file_url;
-        await base44.entities.Performer.update(performer.id, updates);
+        await base44.entities.Performer.update(performer.id, { [type]: file_url });
         setPerformer(p => ({ ...p, [type]: file_url }));
-        toast.success(`${type.replace(/([A-Z])/g, ' $1')} updated!`);
+        toast.success('Photo updated!');
       } catch (e) {
         toast.error('Upload failed');
       }
@@ -56,64 +54,58 @@ export default function PerformerUpload() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!performer) {
-    return <div className="text-center py-12 text-muted-foreground">No performer profile found.</div>;
+    return <div className="text-center py-12 text-muted-foreground text-sm">No profile found.</div>;
   }
 
-  const photoFields = [
-    { key: 'profilePhoto', label: 'Profile Photo', description: 'Main profile picture' },
-    { key: 'idFront', label: 'ID Front', description: 'Front of ID' },
-    { key: 'idBack', label: 'ID Back', description: 'Back of ID' },
-    { key: 'faceId', label: 'Face + ID', description: 'Your face with ID' },
+  const photos = [
+    { key: 'profilePhoto', label: 'Profile Photo', description: 'Main picture' },
+    { key: 'idFront', label: 'ID Front', description: 'Front of your ID' },
+    { key: 'idBack', label: 'ID Back', description: 'Back of your ID' },
+    { key: 'faceId', label: 'Face + ID', description: 'You holding your ID' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Upload Photos</h2>
-        <p className="text-xs text-muted-foreground mt-1">Update your profile pictures and ID verification</p>
+        <h2 className="text-lg font-bold text-foreground">Photos</h2>
+        <p className="text-xs text-muted-foreground">Update your profile pictures</p>
       </div>
 
       <div className="space-y-3">
-        {photoFields.map(field => (
-          <div key={field.key} className="bg-card border border-border rounded-lg p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">{field.label}</p>
-                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
+        {photos.map(photo => (
+          <div key={photo.key} className="bg-card border border-border rounded-lg p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">{photo.label}</p>
+                <p className="text-xs text-muted-foreground">{photo.description}</p>
               </div>
-              {performer[field.key] ? (
-                <div className="flex gap-2">
-                  <img src={performer[field.key]} alt={field.label} className="h-12 w-12 rounded-lg object-cover border border-border" />
-                </div>
-              ) : (
-                <div className="h-12 w-12 rounded-lg bg-secondary border border-border flex items-center justify-center">
-                  <Upload className="h-4 w-4 text-muted-foreground" />
-                </div>
+              {performer[photo.key] && (
+                <img src={performer[photo.key]} alt={photo.label} className="h-14 w-14 rounded-lg object-cover border border-border" />
               )}
             </div>
 
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2">
               <Button
-                onClick={() => handleUploadPhoto(field.key)}
+                onClick={() => handleUploadPhoto(photo.key)}
                 disabled={uploading}
                 size="sm"
-                className="flex-1 bg-primary text-primary-foreground h-8 text-xs"
+                className="flex-1 bg-primary text-primary-foreground h-9 text-xs"
               >
                 {uploading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Plus className="h-3 w-3 mr-1" />}
-                {performer[field.key] ? 'Replace' : 'Upload'}
+                {performer[photo.key] ? 'Replace' : 'Upload'}
               </Button>
-              {performer[field.key] && (
+              {performer[photo.key] && (
                 <Button
-                  onClick={() => handleRemovePhoto(field.key)}
+                  onClick={() => handleRemovePhoto(photo.key)}
                   variant="outline"
                   size="sm"
-                  className="border-border h-8 text-xs"
+                  className="border-border h-9 text-xs"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
@@ -124,12 +116,11 @@ export default function PerformerUpload() {
       </div>
 
       <div className="bg-secondary/30 border border-border rounded-lg p-4 text-xs text-muted-foreground">
-        <p className="font-semibold text-foreground mb-2">Requirements:</p>
+        <p className="font-semibold text-foreground mb-2">Tips:</p>
         <ul className="space-y-1 list-disc list-inside">
-          <li>Photos must be clear and well-lit</li>
-          <li>Profile photo should show your face clearly</li>
+          <li>Use clear, well-lit photos</li>
+          <li>Make sure your face is visible</li>
           <li>ID must be readable and current</li>
-          <li>Face + ID must show you holding your ID</li>
         </ul>
       </div>
     </div>
