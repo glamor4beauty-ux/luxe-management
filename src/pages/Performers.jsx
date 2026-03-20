@@ -17,13 +17,17 @@ export default function Performers() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [contactMode, setContactMode] = useState('phone'); // 'phone' or 'sms'
+  const isPerformer = user?.role === 'performer';
 
   const load = async () => {
     setLoading(true);
     const data = await base44.entities.Performer.list('-created_date');
-    const filtered = user?.role === 'recruiter' 
-      ? data.filter(p => p.recruiterName === user.full_name)
-      : data;
+    let filtered = data;
+    if (user?.role === 'recruiter') {
+      filtered = data.filter(p => p.recruiterName === user.full_name);
+    } else if (isPerformer) {
+      filtered = data.filter(p => p.stageName === user.stageName);
+    }
     setPerformers(filtered);
     setLoading(false);
   };

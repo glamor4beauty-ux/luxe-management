@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Mail, Loader2, Save } from 'lucide-react';
+import { Mail, Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 
 export default function Users() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [inviting, setInviting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer' });
-  const [editingPasswords, setEditingPasswords] = useState({});
 
   useEffect(() => {
     loadUsers();
@@ -47,23 +48,6 @@ export default function Users() {
         ? prev.filter(id => id !== userId)
         : [...prev, userId]
     );
-  };
-
-  const handlePasswordChange = (userId, newPassword) => {
-    setEditingPasswords(prev => ({ ...prev, [userId]: newPassword }));
-  };
-
-  const handleSavePassword = async (userId) => {
-    const newPassword = editingPasswords[userId];
-    if (!newPassword) return;
-    try {
-      await base44.asServiceRole.entities.User.update(userId, { password: newPassword });
-      toast.success('Password updated');
-      setEditingPasswords(prev => ({ ...prev, [userId]: undefined }));
-      loadUsers();
-    } catch (e) {
-      toast.error('Failed to update password');
-    }
   };
 
   const handleSendInvite = async () => {
@@ -154,7 +138,6 @@ export default function Users() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stage Name</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Password</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -171,23 +154,7 @@ export default function Users() {
                       <td className="px-4 py-3 text-foreground font-medium">{u.full_name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{u.stageName || '-'}</td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{u.email}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <Input
-                            type="text"
-                            value={editingPasswords[u.id] ?? u.password ?? ''}
-                            onChange={(e) => handlePasswordChange(u.id, e.target.value)}
-                            placeholder="Set password"
-                            className="h-8 text-xs bg-secondary border-border flex-1"
-                          />
-                          {editingPasswords[u.id] !== undefined && editingPasswords[u.id] !== (u.password ?? '') && (
-                            <Button size="icon" className="h-8 w-8 bg-green-600 hover:bg-green-700" onClick={() => handleSavePassword(u.id)}>
-                              <Save className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">{u.role}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs font-mono">{u.password ? '••••••••' : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
