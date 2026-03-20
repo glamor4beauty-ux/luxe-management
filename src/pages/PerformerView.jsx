@@ -7,9 +7,9 @@ import ContractGenerator from '../components/performers/ContractGenerator';
 import PerformerTasks from '../components/performers/PerformerTasks';
 
 const InfoRow = ({ label, value }) => value ? (
-  <div className="flex flex-col">
+  <div className="flex flex-col min-w-0">
     <span className="text-xs text-muted-foreground">{label}</span>
-    <span className="text-sm text-foreground">{value}</span>
+    <span className="text-sm text-foreground break-words">{value}</span>
   </div>
 ) : null;
 
@@ -136,19 +136,19 @@ export default function PerformerView() {
             </div>
           </div>
 
-          {/* Row 2: Address + language */}
-          <div className="pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {/* Row 2: Address */}
+          <div className="pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <InfoRow label="Street" value={performer.streetAddress} />
             <InfoRow label="City" value={performer.city} />
             <InfoRow label="State" value={performer.state} />
             <InfoRow label="Country" value={performer.country} />
             <InfoRow label="Zip Code" value={performer.zipCode} />
-            <InfoRow label="Other Language" value={performer.otherLanguage} />
           </div>
 
-          {/* Row 3: Orientation + Height */}
-          <div className="pt-4 border-t border-border grid grid-cols-2 gap-4">
+          {/* Row 3: Orientation, Other Language, Height */}
+          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
             <InfoRow label="Orientation" value={performer.orientation} />
+            <InfoRow label="Other Language" value={performer.otherLanguage} />
             <InfoRow label="Height" value={performer.height} />
           </div>
 
