@@ -22,6 +22,7 @@ import SupportContact from './pages/SupportContact';
 import KnowledgeBase from './pages/KnowledgeBase';
 import PerformerProfile from './pages/PerformerProfile';
 import RecruiterDashboard from './pages/RecruiterDashboard';
+import Users from './pages/Users';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
         <Route path="/knowledge-base" element={<KnowledgeBase />} />
         <Route path="/performer-profile" element={<PerformerProfile />} />
         <Route path="/recruiter" element={<RecruiterDashboard />} />
+        <Route path="/users" element={<Users />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
