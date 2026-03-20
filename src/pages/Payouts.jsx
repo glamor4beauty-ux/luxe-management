@@ -248,7 +248,33 @@ export default function Payouts() {
           <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
           <p className="text-sm text-muted-foreground mt-1">Earnings summary & payout records</p>
         </div>
+        <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)} className="border-border">
+          <Settings className="h-4 w-4 mr-2" /> Commission Settings
+        </Button>
       </div>
+
+      {/* Commission Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="bg-card border-border max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Commission Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs text-muted-foreground">Global Commission Rate (%)</Label>
+              <Input type="number" min="0" max="100" step="0.5" value={globalRate} onChange={e => setGlobalRate(e.target.value)} className="bg-secondary border-border text-foreground h-9 mt-1" />
+              <p className="text-xs text-muted-foreground mt-1">Used for performers without individual rates</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setSettingsOpen(false)} className="border-border">Cancel</Button>
+              <Button onClick={handleSaveSettings} disabled={savingSettings} className="bg-primary text-primary-foreground">
+                {savingSettings ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-secondary rounded-lg p-1 mb-6 w-fit">
@@ -258,6 +284,7 @@ export default function Payouts() {
         <button onClick={() => setTab('records')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${tab === 'records' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
           Payout Records
         </button>
+      </div>
       </div>
 
       {/* ── EARNINGS SUMMARY TAB ── */}
