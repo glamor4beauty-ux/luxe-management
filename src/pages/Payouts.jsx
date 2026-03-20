@@ -183,10 +183,10 @@ export default function Payouts() {
                 {stripchatProfiles.filter(p => p.stageName).length === 0 ? (
                   <p className="text-xs text-muted-foreground px-3 py-3">No Stripchat profiles found.</p>
                 ) : (
-                  <>
+                  <div className="max-h-52 overflow-y-auto">
                     <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-secondary border-b border-border">
+                      <thead className="sticky top-0 bg-secondary border-b border-border">
+                        <tr>
                           <th className="px-4 py-2 w-8">
                             <input
                               type="checkbox"
@@ -200,46 +200,38 @@ export default function Payouts() {
                           </th>
                           <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stage Name</th>
                           <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                          {selectedPerformers.length > 0 && (
-                            <th className="text-right px-4 py-2 text-xs text-primary">{selectedPerformers.length} selected</th>
-                          )}
                         </tr>
                       </thead>
+                      <tbody>
+                        {stripchatProfiles.filter(p => p.stageName).map(p => (
+                          <tr
+                            key={p.stageName}
+                            className="border-b border-border/50 hover:bg-secondary/40 cursor-pointer transition-colors"
+                            onClick={() => setSelectedPerformers(prev =>
+                              prev.includes(p.stageName) ? prev.filter(n => n !== p.stageName) : [...prev, p.stageName]
+                            )}
+                          >
+                            <td className="px-4 py-2.5 w-8">
+                              <input
+                                type="checkbox"
+                                className="accent-primary"
+                                checked={selectedPerformers.includes(p.stageName)}
+                                onChange={() => {}}
+                              />
+                            </td>
+                            <td className="px-4 py-2.5 font-medium text-foreground">{p.stageName}</td>
+                            <td className="px-4 py-2.5">
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                p.status === 'active' ? 'bg-green-500/10 text-green-400' :
+                                p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
+                                'bg-yellow-500/10 text-yellow-400'
+                              }`}>{p.status || 'pending'}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
                     </table>
-                    <div className="max-h-52 overflow-y-auto">
-                      <table className="w-full text-sm">
-                        <tbody>
-                          {stripchatProfiles.filter(p => p.stageName).map(p => (
-                            <tr
-                              key={p.stageName}
-                              className="border-b border-border/50 hover:bg-secondary/40 cursor-pointer transition-colors"
-                              onClick={() => setSelectedPerformers(prev =>
-                                prev.includes(p.stageName) ? prev.filter(n => n !== p.stageName) : [...prev, p.stageName]
-                              )}
-                            >
-                              <td className="px-4 py-2.5 w-8">
-                                <input
-                                  type="checkbox"
-                                  className="accent-primary"
-                                  checked={selectedPerformers.includes(p.stageName)}
-                                  onChange={() => {}}
-                                />
-                              </td>
-                              <td className="px-4 py-2.5 font-medium text-foreground">{p.stageName}</td>
-                              <td className="px-4 py-2.5">
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                  p.status === 'active' ? 'bg-green-500/10 text-green-400' :
-                                  p.status === 'inactive' ? 'bg-red-500/10 text-red-400' :
-                                  'bg-yellow-500/10 text-yellow-400'
-                                }`}>{p.status || 'pending'}</span>
-                              </td>
-                              {selectedPerformers.length > 0 && <td />}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
