@@ -59,18 +59,14 @@ const AuthenticatedApp = () => {
       }
     }
 
-    // Require authentication
-    if (!user) {
-      navigateToLogin();
-      return null;
-    }
+
 
   // Render the main app
   return (
     <Routes>
+      <Route path="/" element={!user ? <CustomAuthForm /> : getLandingPage()} />
       <Route path="/auth" element={<CustomAuthForm />} />
       <Route element={<Layout />}>
-        <Route path="/" element={getLandingPage()} />
         <Route path="/performers" element={<Performers />} />
         <Route path="/performers/new" element={<PerformerForm />} />
         <Route path="/performers/:id" element={<PerformerView />} />
