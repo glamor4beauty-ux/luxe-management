@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, Search, Save, Loader2, Pencil } from 'lucide-react';
+import EarningsLookup from '../components/stripchat/EarningsLookup';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,8 @@ export default function StripchatPage() {
           <Plus className="h-4 w-4 mr-2" /> Add Profile
         </Button>
       </div>
+
+      <EarningsLookup profiles={profiles} />
 
       <div className="mb-4 relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
