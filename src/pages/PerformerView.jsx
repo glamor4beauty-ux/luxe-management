@@ -111,152 +111,91 @@ export default function PerformerView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Basic Info */}
-        <div className="bg-card border border-border rounded-xl overflow-hidden lg:col-span-2">
-          <h3 className="text-sm font-semibold text-foreground px-5 pt-5 pb-3">Profile Details</h3>
-          <table className="w-full text-sm border-collapse">
-            <tbody>
-              {/* Row 1: Photo + contact/key fields */}
-              <tr className="border-t border-border">
-                <td rowSpan={9} className="w-40 border-r border-border align-top p-4 bg-secondary/20">
-                  {performer.profilePhoto ? (
-                    <img src={performer.profilePhoto} alt="Profile" className="w-32 h-32 object-cover rounded-lg border border-border" />
-                  ) : (
-                    <div className="w-32 h-32 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl border border-border">
-                      {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
-                    </div>
-                  )}
-                </td>
-                <td className="border-r border-border p-3 bg-secondary/10 w-1/6">
-                  <span className="text-xs text-muted-foreground block">Email</span>
-                  <span className="text-foreground">{performer.email || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3 w-1/6">
-                  <span className="text-xs text-muted-foreground block">Phone</span>
-                  <span className="text-foreground">{performer.phone || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3 bg-secondary/10 w-1/6">
-                  <span className="text-xs text-muted-foreground block">Stage Name</span>
-                  <span className="text-foreground">{performer.stageName || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3 w-1/6">
-                  <span className="text-xs text-muted-foreground block">Recruiter</span>
-                  <span className="text-foreground">{performer.recruiterName || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3 bg-secondary/10 w-1/6">
-                  <span className="text-xs text-muted-foreground block">Applying For</span>
-                  <span className="text-foreground">{performer.applyingFor || '—'}</span>
-                </td>
-                <td className="p-3 w-1/6">
-                  <span className="text-xs text-muted-foreground block">Date of Birth</span>
-                  <span className="text-foreground">{performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : '—'}</span>
-                </td>
-              </tr>
-              {/* Row 2: Address + language + orientation */}
-              <tr className="border-t border-border">
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Street</span>
-                  <span className="text-foreground">{performer.streetAddress || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3">
-                  <span className="text-xs text-muted-foreground block">City</span>
-                  <span className="text-foreground">{performer.city || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">State</span>
-                  <span className="text-foreground">{performer.state || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3">
-                  <span className="text-xs text-muted-foreground block">Country</span>
-                  <span className="text-foreground">{performer.country || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Zip Code</span>
-                  <span className="text-foreground">{performer.zipCode || '—'}</span>
-                </td>
-                <td className="p-3">
-                  <span className="text-xs text-muted-foreground block">Other Language</span>
-                  <span className="text-foreground">{performer.otherLanguage || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 3: Orientation, Height */}
-              <tr className="border-t border-border">
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Orientation</span>
-                  <span className="text-foreground">{performer.orientation || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3" colSpan={5}>
-                  <span className="text-xs text-muted-foreground block">Height</span>
-                  <span className="text-foreground">{performer.height || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 4: Weight, Build, Ethnicity */}
-              <tr className="border-t border-border">
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Weight</span>
-                  <span className="text-foreground">{performer.weight || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3">
-                  <span className="text-xs text-muted-foreground block">Build</span>
-                  <span className="text-foreground">{performer.build || '—'}</span>
-                </td>
-                <td className="p-3 bg-secondary/10" colSpan={4}>
-                  <span className="text-xs text-muted-foreground block">Ethnicity</span>
-                  <span className="text-foreground">{performer.ethnicity || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 5: Eye Color, Hair Color, Hair Length */}
-              <tr className="border-t border-border">
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Eye Color</span>
-                  <span className="text-foreground">{performer.eyeColor || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3">
-                  <span className="text-xs text-muted-foreground block">Hair Color</span>
-                  <span className="text-foreground">{performer.hairColor || '—'}</span>
-                </td>
-                <td className="p-3 bg-secondary/10" colSpan={4}>
-                  <span className="text-xs text-muted-foreground block">Hair Length</span>
-                  <span className="text-foreground">{performer.hairLength || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 6: Breast Size, Butt Size, Dress Size */}
-              <tr className="border-t border-border">
-                <td className="border-r border-border p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Breast Size</span>
-                  <span className="text-foreground">{performer.breastSize || '—'}</span>
-                </td>
-                <td className="border-r border-border p-3">
-                  <span className="text-xs text-muted-foreground block">Butt Size</span>
-                  <span className="text-foreground">{performer.buttSize || '—'}</span>
-                </td>
-                <td className="p-3 bg-secondary/10" colSpan={4}>
-                  <span className="text-xs text-muted-foreground block">Dress Size</span>
-                  <span className="text-foreground">{performer.dressSize || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 7: About */}
-              <tr className="border-t border-border">
-                <td colSpan={6} className="p-3">
-                  <span className="text-xs text-muted-foreground block">About</span>
-                  <span className="text-foreground">{performer.aboutMe || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 8: Turns On */}
-              <tr className="border-t border-border">
-                <td colSpan={6} className="p-3 bg-secondary/10">
-                  <span className="text-xs text-muted-foreground block">Turns On</span>
-                  <span className="text-foreground">{performer.turnsOn || '—'}</span>
-                </td>
-              </tr>
-              {/* Row 9: Turns Off */}
-              <tr className="border-t border-border">
-                <td colSpan={6} className="p-3">
-                  <span className="text-xs text-muted-foreground block">Turns Off</span>
-                  <span className="text-foreground">{performer.turnsOff || '—'}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="bg-card border border-border rounded-xl p-6 lg:col-span-2 space-y-6">
+
+          {/* Row 1: Photo + contact info */}
+          <div className="flex gap-6 items-start">
+            <div className="shrink-0">
+              {performer.profilePhoto ? (
+                <img src={performer.profilePhoto} alt="Profile" className="w-28 h-28 object-cover rounded-xl border border-border" />
+              ) : (
+                <div className="w-28 h-28 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl border border-border">
+                  {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
+                </div>
+              )}
+            </div>
+            <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <InfoRow label="Email" value={performer.email} />
+              <InfoRow label="Phone" value={performer.phone} />
+              <InfoRow label="Stage Name" value={performer.stageName} />
+              <InfoRow label="Recruiter" value={performer.recruiterName} />
+              <InfoRow label="Applying For" value={performer.applyingFor} />
+              <InfoRow label="Date of Birth" value={performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : null} />
+              <InfoRow label="Display Age" value={performer.displayAge} />
+              <InfoRow label="Primary Language" value={performer.primaryLanguage} />
+            </div>
+          </div>
+
+          {/* Row 2: Address + language */}
+          <div className="pt-4 border-t border-border grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <InfoRow label="Street" value={performer.streetAddress} />
+            <InfoRow label="City" value={performer.city} />
+            <InfoRow label="State" value={performer.state} />
+            <InfoRow label="Country" value={performer.country} />
+            <InfoRow label="Zip Code" value={performer.zipCode} />
+            <InfoRow label="Other Language" value={performer.otherLanguage} />
+          </div>
+
+          {/* Row 3: Orientation + Height */}
+          <div className="pt-4 border-t border-border grid grid-cols-2 gap-4">
+            <InfoRow label="Orientation" value={performer.orientation} />
+            <InfoRow label="Height" value={performer.height} />
+          </div>
+
+          {/* Row 4: Weight, Build, Ethnicity */}
+          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
+            <InfoRow label="Weight" value={performer.weight} />
+            <InfoRow label="Build" value={performer.build} />
+            <InfoRow label="Ethnicity" value={performer.ethnicity} />
+          </div>
+
+          {/* Row 5: Eye Color, Hair Color, Hair Length */}
+          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
+            <InfoRow label="Eye Color" value={performer.eyeColor} />
+            <InfoRow label="Hair Color" value={performer.hairColor} />
+            <InfoRow label="Hair Length" value={performer.hairLength} />
+          </div>
+
+          {/* Row 6: Breast Size, Butt Size, Dress Size */}
+          <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
+            <InfoRow label="Breast Size" value={performer.breastSize} />
+            <InfoRow label="Butt Size" value={performer.buttSize} />
+            <InfoRow label="Dress Size" value={performer.dressSize} />
+          </div>
+
+          {/* Row 7: About */}
+          {performer.aboutMe && (
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-1">About</p>
+              <p className="text-sm text-foreground">{performer.aboutMe}</p>
+            </div>
+          )}
+
+          {/* Row 8: Turns On */}
+          {performer.turnsOn && (
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-1">Turns On</p>
+              <p className="text-sm text-foreground">{performer.turnsOn}</p>
+            </div>
+          )}
+
+          {/* Row 9: Turns Off */}
+          {performer.turnsOff && (
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-1">Turns Off</p>
+              <p className="text-sm text-foreground">{performer.turnsOff}</p>
+            </div>
+          )}
         </div>
 
         {/* Memos */}
