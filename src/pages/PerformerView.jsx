@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, FileText, Calendar, Monitor, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Pencil, FileText, Calendar, Monitor, Upload, Loader2, Phone, MessageSquare, Mail } from 'lucide-react';
 import ContractGenerator from '../components/performers/ContractGenerator';
 import PerformerTasks from '../components/performers/PerformerTasks';
 
@@ -33,6 +33,7 @@ export default function PerformerView() {
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [contactMode, setContactMode] = useState('phone');
 
   useEffect(() => {
     async function load() {
@@ -101,7 +102,26 @@ export default function PerformerView() {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* SMS / Phone toggle */}
+          <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
+            <button
+              onClick={() => setContactMode('phone')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                contactMode === 'phone' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Phone className="h-3 w-3" /> Call
+            </button>
+            <button
+              onClick={() => setContactMode('sms')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                contactMode === 'sms' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <MessageSquare className="h-3 w-3" /> SMS
+            </button>
+          </div>
           <ContractGenerator performer={performer} payouts={payouts} />
           <Button variant="outline" size="sm" onClick={() => navigate(`/performers/${performer.id}/edit`)} className="border-border">
             <Pencil className="h-4 w-4 mr-2" /> Edit
@@ -125,8 +145,18 @@ export default function PerformerView() {
               )}
             </div>
             <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              <InfoRow label="Email" value={performer.email} />
-              <InfoRow label="Phone" value={performer.phone} />
+              {performer.email ? (
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs text-muted-foreground">Email</span>
+                  <a href={`mailto:${performer.email}`} className="text-sm text-foreground hover:text-primary transition-colors break-words">{performer.email}</a>
+                </div>
+              ) : null}
+              {performer.phone ? (
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs text-muted-foreground">Phone</span>
+                  <a href={contactMode === 'sms' ? `sms:${performer.phone}` : `tel:${performer.phone}`} className="text-sm text-foreground hover:text-primary transition-colors break-words">{performer.phone}</a>
+                </div>
+              ) : null}
               <InfoRow label="Stage Name" value={performer.stageName} />
               <InfoRow label="Recruiter" value={performer.recruiterName} />
               <InfoRow label="Applying For" value={performer.applyingFor} />
