@@ -17,7 +17,6 @@ const emptyForm = { stageName: '', amount: '', date: '', status: 'unpaid', refer
 
 const fmt = (n) => `$${(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtTk = (n) => `${(n || 0).toLocaleString()} tk`;
-const fmtTk = (n) => `${(n || 0).toLocaleString()} tk`;
 
 export default function Payouts() {
   const [tab, setTab] = useState('summary');
@@ -25,7 +24,6 @@ export default function Payouts() {
   // Summary state
   const [stripchatProfiles, setStripchatProfiles] = useState([]);
   const [selectedPerformers, setSelectedPerformers] = useState([]);
-  const [profileSearch, setProfileSearch] = useState('');
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [summaryRows, setSummaryRows] = useState([]);
@@ -146,68 +144,6 @@ export default function Payouts() {
     setLoading(false);
   };
 
-  // Fetch earnings from Stripchat API for selected performers in the date range
-  const handleFetchEarnings = async () => {
-    if (!periodStart || !periodEnd) { toast.error('Both Period Start and End are required'); return; }
-    if (periodStart > periodEnd) { toast.error('Period Start must be before Period End'); return; }
-    if (selectedPerformers.length === 0) { toast.error('Please select at least one performer'); return; }
-
-    setFetchingEarnings(true);
-    setSummaryRows([]);
-
-    const allPayouts = await base44.entities.Payout.list();
-    const periodPayouts = allPayouts.filter(p => {
-      if (!p.date) return false;
-      const d = p.date.slice(0, 10);
-      return d >= periodStart && d <= periodEnd;
-    });
-
-    const activeProfiles = stripchatProfiles.filter(p => selectedPerformers.includes(p.stageName));
-    const rows = [];
-    for (const profile of activeProfiles) {
-      try {
-        const res = await base44.functions.invoke('stripchatEarnings', {
-          modelUsername: profile.stageName,
-          periodStart: periodStart + ' 00:00:00',
-          periodEnd: periodEnd + ' 23:59:59',
-        });
-        const data = res.data;
-        if (data?.error) {
-          rows.push({ stageName: profile.stageName, error: data.error, totalTokens: 0, paidAmount: 0 });
-        } else {
-          const totalTokens = data?.totalEarnings || 0;
-          const paidAmount = periodPayouts
-            .filter(p => p.stageName === profile.stageName && p.status === 'paid')
-            .reduce((s, p) => s + (p.amount || 0), 0);
-          rows.push({ stageName: profile.stageName, totalTokens, paidAmount, rawData: data });
-        }
-      } catch (e) {
-        rows.push({ stageName: profile.stageName, error: e.message, totalTokens: 0, paidAmount: 0 });
-      }
-    }
-
-    setSummaryRows(rows);
-    setFetchingEarnings(false);
-    toast.success(`Fetched earnings for ${rows.length} performer(s)`);
-  };
-
-  const handleMarkCyclePaid = async (row) => {
-    setMarkingPaid(m => ({ ...m, [row.stageName]: true }));
-    const today = new Date().toISOString();
-    await base44.entities.Payout.create({
-      stageName: row.stageName,
-      amount: row.totalTokens, // store tokens as the amount (user can convert)
-      date: today,
-      status: 'paid',
-      referenceId: `${periodStart}_${periodEnd}`,
-      notes: `Auto-created from Stripchat earnings ${periodStart} – ${periodEnd}`,
-    });
-    toast.success(`Marked ${row.stageName} as paid!`);
-    setSummaryRows(prev => prev.map(r => r.stageName === row.stageName ? { ...r, paidAmount: r.totalTokens } : r));
-    setMarkingPaid(m => ({ ...m, [row.stageName]: false }));
-    loadPayouts();
-  };
-
   // Records tab helpers
   const handleSave = async () => {
     if (!form.stageName || !form.amount || !form.date) { toast.error("Stage Name, Amount, and Date are required"); return; }
@@ -246,7 +182,7 @@ export default function Payouts() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
-          <p className="text-sm text-muted-foreground mt-1">Earnings summary & payout records</p>
+          <p className="text-sm text-muted-foreground mt-1">Earnings summary & commission-based payout records</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)} className="border-border">
           <Settings className="h-4 w-4 mr-2" /> Commission Settings
@@ -285,12 +221,11 @@ export default function Payouts() {
           Payout Records
         </button>
       </div>
-      </div>
 
       {/* ── EARNINGS SUMMARY TAB ── */}
       {tab === 'summary' && (
         <div>
-          {/* Date range picker */}
+          {/* Fetch Earnings Section */}
           <div className="bg-card border border-border rounded-xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="h-4 w-4 text-primary" />
@@ -376,7 +311,7 @@ export default function Payouts() {
             )}
           </div>
 
-          {/* Summary table */}
+          {/* Summary table with commission calculations */}
           {summaryRows.length > 0 && (
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
@@ -385,15 +320,18 @@ export default function Payouts() {
                     <tr className="border-b border-border bg-secondary/50">
                       <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Performer</th>
                       <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Earned (tk)</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Paid ($)</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Balance (tk)</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Commission Rate</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Commission ($)</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                       <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {summaryRows.map(row => {
-                      const balance = row.totalTokens - row.paidAmount;
-                      const isPaid = row.paidAmount >= row.totalTokens && row.totalTokens > 0;
+                      const performer = performers.find(p => p.stageName === row.stageName);
+                      const rate = performer?.commissionRate || parseFloat(globalRate);
+                      const commission = row.totalTokens * (rate / 100);
+                      const isPaid = row.paidAmount >= commission && commission > 0;
                       return (
                         <tr key={row.stageName} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
                           <td className="px-4 py-3 text-foreground font-medium">@{row.stageName}</td>
@@ -403,29 +341,24 @@ export default function Payouts() {
                               : <span className="text-primary font-semibold">{fmtTk(row.totalTokens)}</span>
                             }
                           </td>
-                          <td className="px-4 py-3 text-green-400 font-medium">{fmt(row.paidAmount)}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{rate}%</td>
+                          <td className="px-4 py-3 text-green-400 font-semibold">{fmt(commission)}</td>
                           <td className="px-4 py-3">
-                            <span className={`font-semibold ${balance > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                              {balance > 0 ? fmtTk(balance) : '—'}
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${isPaid ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                              {isPaid ? 'Paid' : 'Pending'}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            {!row.error && (
-                              isPaid ? (
-                                <span className="text-xs text-green-400 flex items-center justify-end gap-1">
-                                  <CheckCircle className="h-3.5 w-3.5" /> Paid
-                                </span>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleMarkCyclePaid(row)}
-                                  disabled={markingPaid[row.stageName]}
-                                  className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
-                                >
-                                  {markingPaid[row.stageName] ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-                                  Mark as Paid
-                                </Button>
-                              )
+                            {!row.error && !isPaid && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleMarkCyclePaid(row)}
+                                disabled={markingPaid[row.stageName]}
+                                className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                {markingPaid[row.stageName] ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                                Mark Paid
+                              </Button>
                             )}
                           </td>
                         </tr>
@@ -436,10 +369,13 @@ export default function Payouts() {
                     <tr className="border-t border-border bg-secondary/30">
                       <td className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Totals</td>
                       <td className="px-4 py-3 text-primary font-bold">{fmtTk(summaryRows.reduce((s, r) => s + r.totalTokens, 0))}</td>
-                      <td className="px-4 py-3 text-green-400 font-bold">{fmt(summaryRows.reduce((s, r) => s + r.paidAmount, 0))}</td>
-                      <td className="px-4 py-3 text-red-400 font-bold">
-                        {fmtTk(summaryRows.reduce((s, r) => s + Math.max(0, r.totalTokens - r.paidAmount), 0))}
-                      </td>
+                      <td />
+                      <td className="px-4 py-3 text-green-400 font-bold">{fmt(summaryRows.reduce((s, r) => {
+                        const p = performers.find(x => x.stageName === r.stageName);
+                        const rate = p?.commissionRate || parseFloat(globalRate);
+                        return s + (r.totalTokens * (rate / 100));
+                      }, 0))}</td>
+                      <td />
                       <td />
                     </tr>
                   </tfoot>
@@ -450,7 +386,7 @@ export default function Payouts() {
 
           {summaryRows.length === 0 && !fetchingEarnings && (
             <div className="text-center py-16 text-muted-foreground text-sm">
-              Select a date range and click "Fetch All Earnings" to see the earnings summary.
+              Select performers, a date range, and click "Fetch Earnings" to see commission calculations.
             </div>
           )}
         </div>
