@@ -40,6 +40,11 @@ const AuthenticatedApp = () => {
     return <Dashboard />; // admin/default
   };
 
+  // Always show custom auth if no user
+  if (!user) {
+    return <CustomAuthForm />;
+  }
+
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -50,14 +55,13 @@ const AuthenticatedApp = () => {
   }
 
   // Handle authentication errors
-    if (authError) {
-      if (authError.type === 'user_not_registered') {
-        return <UserNotRegisteredError />;
-      } else if (authError.type === 'auth_required') {
-        navigateToLogin();
-        return null;
-      }
+  if (authError) {
+    if (authError.type === 'user_not_registered') {
+      return <UserNotRegisteredError />;
+    } else if (authError.type === 'auth_required') {
+      return <CustomAuthForm />;
     }
+  }
 
 
 
