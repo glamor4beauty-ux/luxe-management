@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImportExportBar from "../components/performers/ImportExportBar";
@@ -14,6 +14,7 @@ export default function Performers() {
   const [performers, setPerformers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [contactMode, setContactMode] = useState('phone'); // 'phone' or 'sms'
 
   const load = async () => {
     setLoading(true);
@@ -45,7 +46,26 @@ export default function Performers() {
           <h1 className="text-2xl font-bold text-foreground">Performers</h1>
           <p className="text-sm text-muted-foreground mt-1">{performers.length} total performers</p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* SMS / Phone toggle */}
+          <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
+            <button
+              onClick={() => setContactMode('phone')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                contactMode === 'phone' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Phone className="h-3 w-3" /> Call
+            </button>
+            <button
+              onClick={() => setContactMode('sms')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                contactMode === 'sms' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <MessageSquare className="h-3 w-3" /> SMS
+            </button>
+          </div>
           <ImportExportBar onImportComplete={load} />
           <Link to="/performers/new">
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -104,8 +124,20 @@ export default function Performers() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{p.stageName}</td>
-                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{p.email}</td>
-                    <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{p.phone}</td>
+                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
+                      {p.email ? (
+                        <a href={`mailto:${p.email}`} className="hover:text-primary transition-colors" onClick={e => e.stopPropagation()}>{p.email}</a>
+                      ) : '-'}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">
+                      {p.phone ? (
+                        <a
+                          href={contactMode === 'sms' ? `sms:${p.phone}` : `tel:${p.phone}`}
+                          className="hover:text-primary transition-colors"
+                          onClick={e => e.stopPropagation()}
+                        >{p.phone}</a>
+                      ) : '-'}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Link to={`/performers/${p.id}`}>
