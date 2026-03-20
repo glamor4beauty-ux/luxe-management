@@ -76,14 +76,22 @@ const COL_MAP = {
 };
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'stageName'];
+const NUMBER_FIELDS = ['displayAge'];
 
 function mapRow(row) {
   const result = {};
   for (const [field, aliases] of Object.entries(COL_MAP)) {
     const match = aliases.find(a => row[a] !== undefined);
-    if (match && row[match]) result[field] = row[match];
+    if (match && row[match]) {
+      if (NUMBER_FIELDS.includes(field)) {
+        const num = parseFloat(row[match]);
+        if (!isNaN(num)) result[field] = num;
+        // skip if not a valid number
+      } else {
+        result[field] = row[match];
+      }
+    }
   }
-  // Ensure required fields always have a value (empty string fallback)
   REQUIRED_FIELDS.forEach(f => { if (!result[f]) result[f] = ''; });
   return result;
 }
@@ -118,19 +126,23 @@ export default function ImportExportBar({ onImportComplete }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
-    toast.info('Reading file...');
     try {
+      toast.info('📂 Reading file...');
       const text = await readFileWithFallback(file);
+
+      toast.info('🔍 Parsing rows...');
       const rows = parseCSV(text);
       const records = rows.map(mapRow).filter(r => r.firstName || r.email || r.stageName);
 
-      if (records.length > 0) {
-        await base44.entities.Performer.bulkCreate(records);
-        toast.success(`Import complete! ${records.length} performer(s) imported.`);
-        onImportComplete?.();
-      } else {
+      if (records.length === 0) {
         toast.error('No valid records found. Make sure the file has firstName, email, or stageName columns.');
+        return;
       }
+
+      toast.info(`⬆️ Importing ${records.length} performer(s)...`);
+      await base44.entities.Performer.bulkCreate(records);
+      toast.success(`✅ Import complete! ${records.length} performer(s) imported.`);
+      onImportComplete?.();
     } catch (err) {
       toast.error('Import failed: ' + err.message);
     } finally {
