@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, Search, Save, Loader2, CheckCircle, DollarSign, TrendingUp, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Search, Save, Loader2, CheckCircle, DollarSign, TrendingUp, RefreshCw, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ const emptyForm = { stageName: '', amount: '', date: '', status: 'unpaid', refer
 
 const fmt = (n) => `$${(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtTk = (n) => `${(n || 0).toLocaleString()} tk`;
+const fmtTk = (n) => `${(n || 0).toLocaleString()} tk`;
 
 export default function Payouts() {
   const [tab, setTab] = useState('summary');
@@ -30,6 +31,11 @@ export default function Payouts() {
   const [summaryRows, setSummaryRows] = useState([]);
   const [fetchingEarnings, setFetchingEarnings] = useState(false);
   const [markingPaid, setMarkingPaid] = useState({});
+  const [commissionSettings, setCommissionSettings] = useState(null);
+  const [performers, setPerformers] = useState([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [globalRate, setGlobalRate] = useState('30');
+  const [savingSettings, setSavingSettings] = useState(false);
 
   // Records state
   const [payouts, setPayouts] = useState([]);
@@ -42,8 +48,96 @@ export default function Payouts() {
 
   useEffect(() => {
     base44.entities.Stripchat.list().then(setStripchatProfiles);
+    base44.entities.Performer.list().then(setPerformers);
     loadPayouts();
+    loadCommissionSettings();
   }, []);
+
+  const loadCommissionSettings = async () => {
+    const settings = await base44.entities.CommissionSettings.list();
+    if (settings.length > 0) {
+      setCommissionSettings(settings[0]);
+      setGlobalRate(String(settings[0].globalCommissionRate || 30));
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    if (commissionSettings?.id) {
+      await base44.entities.CommissionSettings.update(commissionSettings.id, { globalCommissionRate: parseFloat(globalRate) });
+    } else {
+      await base44.entities.CommissionSettings.create({ globalCommissionRate: parseFloat(globalRate) });
+    }
+    toast.success('Settings saved!');
+    setSavingSettings(false);
+    setSettingsOpen(false);
+    loadCommissionSettings();
+  };
+
+  // Fetch earnings from Stripchat API for selected performers in the date range
+  const handleFetchEarnings = async () => {
+    if (!periodStart || !periodEnd) { toast.error('Both Period Start and End are required'); return; }
+    if (periodStart > periodEnd) { toast.error('Period Start must be before Period End'); return; }
+    if (selectedPerformers.length === 0) { toast.error('Please select at least one performer'); return; }
+
+    setFetchingEarnings(true);
+    setSummaryRows([]);
+
+    const allPayouts = await base44.entities.Payout.list();
+    const periodPayouts = allPayouts.filter(p => {
+      if (!p.date) return false;
+      const d = p.date.slice(0, 10);
+      return d >= periodStart && d <= periodEnd;
+    });
+
+    const activeProfiles = stripchatProfiles.filter(p => selectedPerformers.includes(p.stageName));
+    const rows = [];
+    for (const profile of activeProfiles) {
+      try {
+        const res = await base44.functions.invoke('stripchatEarnings', {
+          modelUsername: profile.stageName,
+          periodStart: periodStart + ' 00:00:00',
+          periodEnd: periodEnd + ' 23:59:59',
+        });
+        const data = res.data;
+        if (data?.error) {
+          rows.push({ stageName: profile.stageName, error: data.error, totalTokens: 0, paidAmount: 0 });
+        } else {
+          const totalTokens = data?.totalEarnings || 0;
+          const paidAmount = periodPayouts
+            .filter(p => p.stageName === profile.stageName && p.status === 'paid')
+            .reduce((s, p) => s + (p.amount || 0), 0);
+          rows.push({ stageName: profile.stageName, totalTokens, paidAmount, rawData: data });
+        }
+      } catch (e) {
+        rows.push({ stageName: profile.stageName, error: e.message, totalTokens: 0, paidAmount: 0 });
+      }
+    }
+
+    setSummaryRows(rows);
+    setFetchingEarnings(false);
+    toast.success(`Fetched earnings for ${rows.length} performer(s)`);
+  };
+
+  const handleMarkCyclePaid = async (row) => {
+    setMarkingPaid(m => ({ ...m, [row.stageName]: true }));
+    const today = new Date().toISOString();
+    const performer = performers.find(p => p.stageName === row.stageName);
+    const rate = performer?.commissionRate || parseFloat(globalRate);
+    const commission = row.totalTokens * (rate / 100);
+    await base44.entities.Payout.create({
+      stageName: row.stageName,
+      amount: commission,
+      date: today,
+      status: 'paid',
+      referenceId: `${periodStart}_${periodEnd}`,
+      notes: `Auto-created from Stripchat earnings ${periodStart} – ${periodEnd}. Rate: ${rate}%`,
+    });
+    toast.success(`Marked ${row.stageName} as paid!`);
+    setSummaryRows(prev => prev.map(r => r.stageName === row.stageName ? { ...r, paidAmount: r.totalTokens } : r));
+    setMarkingPaid(m => ({ ...m, [row.stageName]: false }));
+    loadPayouts();
+  };
 
   const loadPayouts = async () => {
     setLoading(true);
