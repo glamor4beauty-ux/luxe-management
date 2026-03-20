@@ -119,21 +119,24 @@ export default function ImportExportBar({ onImportComplete }) {
     if (!file) return;
     setImporting(true);
     toast.info('Reading file...');
+    try {
+      const text = await readFileWithFallback(file);
+      const rows = parseCSV(text);
+      const records = rows.map(mapRow).filter(r => r.firstName || r.email || r.stageName);
 
-    const text = await readFileWithFallback(file);
-    const rows = parseCSV(text);
-    const records = rows.map(mapRow).filter(r => r.firstName || r.email || r.stageName);
-
-    if (records.length > 0) {
-      await base44.entities.Performer.bulkCreate(records);
-      toast.success(`Import complete! ${records.length} performer(s) imported.`);
-      onImportComplete?.();
-    } else {
-      toast.error('No valid records found. Make sure the file has firstName, email, or stageName columns.');
+      if (records.length > 0) {
+        await base44.entities.Performer.bulkCreate(records);
+        toast.success(`Import complete! ${records.length} performer(s) imported.`);
+        onImportComplete?.();
+      } else {
+        toast.error('No valid records found. Make sure the file has firstName, email, or stageName columns.');
+      }
+    } catch (err) {
+      toast.error('Import failed: ' + err.message);
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-
-    setImporting(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleExport = async () => {
