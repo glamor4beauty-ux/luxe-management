@@ -114,18 +114,9 @@ export default function PerformerView() {
         <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold text-foreground mb-4">Profile Details</h3>
           {performer.profilePhoto && (
-            <div className="flex gap-6 mb-5">
-              <img src={performer.profilePhoto} alt="Profile" className="h-36 w-36 object-cover rounded-xl border border-border shrink-0" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 content-start">
-                <InfoRow label="Email" value={!performer.profilePhoto ? performer.email : null} />
-                <InfoRow label="Phone" value={!performer.profilePhoto ? performer.phone : null} />
-                <InfoRow label="Recruiter" value={!performer.profilePhoto ? performer.recruiterName : null} />
-                <InfoRow label="Applying For" value={!performer.profilePhoto ? performer.applyingFor : null} />
-                <InfoRow label="City" value={!performer.profilePhoto ? performer.city : null} />
-                <InfoRow label="State" value={!performer.profilePhoto ? performer.state : null} />
-                <InfoRow label="Country" value={!performer.profilePhoto ? performer.country : null} />
-                <InfoRow label="Display Age" value={!performer.profilePhoto ? performer.displayAge : null} />
-              </div>
+            <div className="mb-4">
+              <p className="text-xs text-muted-foreground mb-2">Profile Photo</p>
+              <img src={performer.profilePhoto} alt="Profile" className="h-32 w-32 object-cover rounded-xl border border-border" />
             </div>
           )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
