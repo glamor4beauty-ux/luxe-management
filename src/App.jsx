@@ -13,7 +13,7 @@ import PerformerView from './pages/PerformerView';
 import Memos from './pages/Memos';
 import CalendarPage from './pages/CalendarPage';
 import StripchatPage from './pages/StripchatPage';
-import Payouts from './pages/Payouts.jsx';
+import Payouts from './pages/Payouts';
 import Tasks from './pages/Tasks';
 import Register from './pages/Register';
 import PerformerDashboard from './pages/PerformerDashboard';
