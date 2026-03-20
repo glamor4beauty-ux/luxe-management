@@ -92,6 +92,79 @@ export default function Dashboard() {
         <StatCard icon={Calendar} label="Calendar Events" count={stats.calendars} to="/calendar" color="bg-chart-3/10 text-chart-3" />
         <StatCard icon={Monitor} label="Stripchat Profiles" count={stats.stripchats} to="/stripchat" color="bg-chart-4/10 text-chart-4" />
       </div>
+
+      {/* Secondary KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <div className="bg-card border border-border rounded-xl p-5 flex items-center gap-4">
+          <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+            <Activity className="h-5 w-5 text-green-400" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Active Performers</p>
+            <p className="text-3xl font-bold text-foreground">{activePerformers}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">With active Stripchat profile</p>
+          </div>
+        </div>
+        <div className="bg-card border border-border rounded-xl p-5 flex items-center gap-4">
+          <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+            <TrendingUp className="h-5 w-5 text-yellow-400" />
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Open Tasks</p>
+            <p className="text-3xl font-bold text-foreground">{pendingTasks}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Pending or in progress</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        {/* Signups per week */}
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-1">New Performer Signups</h3>
+          <p className="text-xs text-muted-foreground mb-4">Per week over the last 8 weeks</p>
+          {signupData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={signupData} barSize={28}>
+                <XAxis dataKey="week" tick={{ fontSize: 11, fill: 'hsl(220 10% 55%)' }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(220 10% 55%)' }} axisLine={false} tickLine={false} width={24} />
+                <Tooltip
+                  contentStyle={{ background: 'hsl(220 18% 10%)', border: '1px solid hsl(220 15% 18%)', borderRadius: 8, fontSize: 12 }}
+                  labelStyle={{ color: 'hsl(220 10% 92%)' }}
+                  itemStyle={{ color: 'hsl(42 80% 55%)' }}
+                />
+                <Bar dataKey="signups" fill="hsl(42,80%,55%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">No signup data yet</div>
+          )}
+        </div>
+
+        {/* Platform status breakdown */}
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-1">Stripchat Status</h3>
+          <p className="text-xs text-muted-foreground mb-4">Profile breakdown by status</p>
+          {platformData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie data={platformData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                  {platformData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: 'hsl(220 18% 10%)', border: '1px solid hsl(220 15% 18%)', borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: 'hsl(220 10% 92%)' }}
+                />
+                <Legend iconSize={10} iconType="circle" wrapperStyle={{ fontSize: 12, color: 'hsl(220 10% 55%)' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">No platform data yet</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
