@@ -5,7 +5,14 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Performers from './pages/Performers';
+import PerformerForm from './pages/PerformerForm';
+import PerformerView from './pages/PerformerView';
+import Memos from './pages/Memos';
+import CalendarPage from './pages/CalendarPage';
+import StripchatPage from './pages/StripchatPage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,7 +40,16 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/performers" element={<Performers />} />
+        <Route path="/performers/new" element={<PerformerForm />} />
+        <Route path="/performers/:id" element={<PerformerView />} />
+        <Route path="/performers/:id/edit" element={<PerformerForm />} />
+        <Route path="/memos" element={<Memos />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/stripchat" element={<StripchatPage />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
