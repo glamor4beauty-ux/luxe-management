@@ -1,13 +1,14 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import { cn } from "@/lib/utils";
 import {
   Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem,
   SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarInset
 } from "@/components/ui/sidebar";
 
-const navItems = [
+const adminNavItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/performers', label: 'Performers', icon: Users },
   { path: '/memos', label: 'Memos', icon: FileText },
@@ -17,8 +18,37 @@ const navItems = [
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
 ];
 
+const recruiterNavItems = [
+  { path: '/recruiter', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/performers', label: 'My Performers', icon: Users },
+];
+
 export default function Layout() {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const navItems = user?.role === 'recruiter' ? recruiterNavItems : adminNavItems;
+
+  // Hide admin pages from non-admin users
+  const adminPages = ['/performers', '/memos', '/calendar', '/stripchat', '/payouts', '/tasks'];
+  const isAdminPage = adminPages.includes(location.pathname) || adminPages.some(p => location.pathname.startsWith(p + '/'));
+  const canAccessPage = user?.role === 'admin' || !isAdminPage;
+
+  if (!canAccessPage) {
+    return (
+      <SidebarProvider>
+        <SidebarInset>
+          <div className="p-8 text-center h-screen flex items-center justify-center">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Access Denied</h1>
+              <p className="text-muted-foreground mb-4">You don't have permission to access this page.</p>
+              <Link to="/" className="text-primary hover:underline">Go to Dashboard</Link>
+            </div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    );
+  }
 
   return (
     <SidebarProvider>
