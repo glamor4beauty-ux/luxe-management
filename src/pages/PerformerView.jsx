@@ -113,6 +113,12 @@ export default function PerformerView() {
         {/* Basic Info */}
         <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
           <h3 className="text-sm font-semibold text-foreground mb-4">Profile Details</h3>
+          {performer.profilePhoto && (
+            <div className="mb-4">
+              <p className="text-xs text-muted-foreground mb-2">Profile Photo</p>
+              <img src={performer.profilePhoto} alt="Profile" className="h-32 w-32 object-cover rounded-xl border border-border" />
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <InfoRow label="Email" value={performer.email} />
             <InfoRow label="Phone" value={performer.phone} />
