@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare } from 'lucide-react';
+import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare, Mail } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImportExportBar from "../components/performers/ImportExportBar";
@@ -17,6 +17,8 @@ export default function Performers() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [contactMode, setContactMode] = useState('phone'); // 'phone' or 'sms'
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [inviting, setInviting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -43,6 +45,27 @@ export default function Performers() {
       (p.email?.toLowerCase().includes(q)) ||
       (p.stageName?.toLowerCase().includes(q));
   });
+
+  const handleInviteSelected = async () => {
+    if (selectedUserIds.length === 0) return;
+    setInviting(true);
+    try {
+      await base44.functions.invoke('sendInvites', { userIds: selectedUserIds });
+      toast.success(`Invites sent to ${selectedUserIds.length} user(s)`);
+      setSelectedUserIds([]);
+    } catch (e) {
+      toast.error('Failed to send invites');
+    }
+    setInviting(false);
+  };
+
+  const toggleUserSelect = (performerId) => {
+    setSelectedUserIds(prev =>
+      prev.includes(performerId)
+        ? prev.filter(id => id !== performerId)
+        : [...prev, performerId]
+    );
+  };
 
   return (
     <div>
@@ -76,6 +99,17 @@ export default function Performers() {
           {user?.role === 'admin' && (
             <>
               <ImportExportBar onImportComplete={load} />
+              {selectedUserIds.length > 0 && (
+                <Button
+                  onClick={handleInviteSelected}
+                  disabled={inviting}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  size="sm"
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  {inviting ? 'Sending...' : `Invite Selected (${selectedUserIds.length})`}
+                </Button>
+              )}
               <Link to="/performers/new">
                 <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
                   <Plus className="h-4 w-4 mr-2" /> Add Performer
@@ -112,6 +146,18 @@ export default function Performers() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-secondary/50">
+                  {user?.role === 'admin' && (
+                    <th className="px-4 py-3 w-12">
+                      <input
+                        type="checkbox"
+                        className="accent-primary"
+                        checked={selectedUserIds.length > 0 && selectedUserIds.length === filtered.length}
+                        onChange={(e) =>
+                          setSelectedUserIds(e.target.checked ? filtered.map(p => p.id) : [])
+                        }
+                      />
+                    </th>
+                  )}
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Stage Name</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Email</th>
@@ -122,6 +168,16 @@ export default function Performers() {
               <tbody>
                 {filtered.map(p => (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                    {user?.role === 'admin' && (
+                      <td className="px-4 py-3 w-12">
+                        <input
+                          type="checkbox"
+                          className="accent-primary"
+                          checked={selectedUserIds.includes(p.id)}
+                          onChange={() => toggleUserSelect(p.id)}
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {p.profilePhoto ? (
