@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
@@ -8,20 +8,20 @@ import { toast } from "sonner";
 
 export default function PerformerForm() {
   const navigate = useNavigate();
-  const urlParams = new URLSearchParams(window.location.search);
-  const editId = urlParams.get('id');
+  const { id: editId } = useParams();
+  const isEdit = editId && editId !== 'new';
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(!!editId);
+  const [loading, setLoading] = useState(!!isEdit);
 
   useEffect(() => {
-    if (editId) {
+    if (isEdit) {
       base44.entities.Performer.filter({ id: editId }).then(res => {
         if (res.length > 0) setData(res[0]);
         setLoading(false);
       });
     }
-  }, [editId]);
+  }, [isEdit, editId]);
 
   const handleSave = async () => {
     if (!data.firstName || !data.lastName || !data.email || !data.stageName) {
@@ -31,7 +31,7 @@ export default function PerformerForm() {
     setSaving(true);
     // Strip built-in fields before saving
     const { id, created_date, updated_date, created_by, ...saveData } = data;
-    if (editId) {
+    if (isEdit) {
       await base44.entities.Performer.update(editId, saveData);
       toast.success("Performer updated!");
     } else {
@@ -58,13 +58,13 @@ export default function PerformerForm() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{editId ? 'Edit' : 'Add'} Performer</h1>
+            <h1 className="text-2xl font-bold text-foreground">{isEdit ? 'Edit' : 'Add'} Performer</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Fill in the performer details below</p>
           </div>
         </div>
         <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-          {editId ? 'Update' : 'Save'}
+          {isEdit ? 'Update' : 'Save'}
         </Button>
       </div>
 

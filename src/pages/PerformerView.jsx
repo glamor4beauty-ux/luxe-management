@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil, FileText, Calendar, Monitor } from 'lucide-react';
@@ -23,8 +23,7 @@ const Section = ({ title, icon: Icon, children }) => (
 
 export default function PerformerView() {
   const navigate = useNavigate();
-  const urlParams = new URLSearchParams(window.location.search);
-  const id = urlParams.get('id');
+  const { id } = useParams();
   const [performer, setPerformer] = useState(null);
   const [memos, setMemos] = useState([]);
   const [events, setEvents] = useState([]);
