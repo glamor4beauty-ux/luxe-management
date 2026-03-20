@@ -145,18 +145,18 @@ export default function PerformerView() {
             <InfoRow label="Zip Code" value={performer.zipCode} />
           </div>
 
-          {/* Row 3: Orientation, Other Language, Height */}
+          {/* Row 3: Orientation, Other Language, Ethnicity */}
           <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
             <InfoRow label="Orientation" value={performer.orientation} />
             <InfoRow label="Other Language" value={performer.otherLanguage} />
-            <InfoRow label="Height" value={performer.height} />
+            <InfoRow label="Ethnicity" value={performer.ethnicity} />
           </div>
 
-          {/* Row 4: Weight, Build, Ethnicity */}
+          {/* Row 4: Height, Weight, Build */}
           <div className="pt-4 border-t border-border grid grid-cols-3 gap-4">
+            <InfoRow label="Height" value={performer.height} />
             <InfoRow label="Weight" value={performer.weight} />
             <InfoRow label="Build" value={performer.build} />
-            <InfoRow label="Ethnicity" value={performer.ethnicity} />
           </div>
 
           {/* Row 5: Eye Color, Hair Color, Hair Length */}
