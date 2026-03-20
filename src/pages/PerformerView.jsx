@@ -111,48 +111,70 @@ export default function PerformerView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Basic Info */}
-        <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Profile Details</h3>
-          {performer.profilePhoto && (
-            <div className="mb-4">
-              <p className="text-xs text-muted-foreground mb-2">Profile Photo</p>
-              <img src={performer.profilePhoto} alt="Profile" className="h-32 w-32 object-cover rounded-xl border border-border" />
+        <div className="bg-card border border-border rounded-xl overflow-hidden lg:col-span-2">
+          <h3 className="text-sm font-semibold text-foreground px-5 pt-5 mb-4">Profile Details</h3>
+          {/* Row 1: photo + key info */}
+          <div className="flex gap-0 border-b border-border">
+            {/* Photo cell */}
+            <div className="w-40 shrink-0 border-r border-border p-4 flex items-start justify-center bg-secondary/20">
+              {performer.profilePhoto ? (
+                <img src={performer.profilePhoto} alt="Profile" className="w-32 h-32 object-cover rounded-lg border border-border" />
+              ) : (
+                <div className="w-32 h-32 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-3xl border border-border">
+                  {(performer.firstName?.[0] || '') + (performer.lastName?.[0] || '')}
+                </div>
+              )}
             </div>
-          )}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <InfoRow label="Email" value={performer.email} />
-            <InfoRow label="Phone" value={performer.phone} />
-            <InfoRow label="Recruiter" value={performer.recruiterName} />
-            <InfoRow label="Applying For" value={performer.applyingFor} />
-            <InfoRow label="City" value={performer.city} />
-            <InfoRow label="State" value={performer.state} />
-            <InfoRow label="Country" value={performer.country} />
-            <InfoRow label="Display Age" value={performer.displayAge} />
+            {/* Key fields */}
+            <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-3 p-5 content-start">
+              <InfoRow label="Email" value={performer.email} />
+              <InfoRow label="Phone" value={performer.phone} />
+              <InfoRow label="Stage Name" value={performer.stageName} />
+              <InfoRow label="Recruiter" value={performer.recruiterName} />
+              <InfoRow label="Applying For" value={performer.applyingFor} />
+              <InfoRow label="Date of Birth" value={performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : null} />
+              <InfoRow label="Display Age" value={performer.displayAge} />
+              <InfoRow label="Primary Language" value={performer.primaryLanguage} />
+              <InfoRow label="Other Language" value={performer.otherLanguage} />
+              <InfoRow label="City" value={performer.city} />
+              <InfoRow label="State" value={performer.state} />
+              <InfoRow label="Country" value={performer.country} />
+              <InfoRow label="Zip Code" value={performer.zipCode} />
+              <InfoRow label="Street" value={performer.streetAddress} />
+              <InfoRow label="Orientation" value={performer.orientation} />
+              <InfoRow label="Interested In" value={performer.interestedIn} />
+            </div>
+          </div>
+          {/* Row 2: physical */}
+          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-x-4 gap-y-3 px-5 py-4 border-b border-border bg-secondary/10">
             <InfoRow label="Height" value={performer.height} />
             <InfoRow label="Weight" value={performer.weight} />
             <InfoRow label="Build" value={performer.build} />
             <InfoRow label="Ethnicity" value={performer.ethnicity} />
             <InfoRow label="Eye Color" value={performer.eyeColor} />
             <InfoRow label="Hair Color" value={performer.hairColor} />
-            <InfoRow label="Orientation" value={performer.orientation} />
-            <InfoRow label="Primary Language" value={performer.primaryLanguage} />
+            <InfoRow label="Hair Length" value={performer.hairLength} />
+            <InfoRow label="Breast Size" value={performer.breastSize} />
+            <InfoRow label="Butt Size" value={performer.buttSize} />
+            <InfoRow label="Dress Size" value={performer.dressSize} />
           </div>
+          {/* Row 3: bio */}
           {(performer.aboutMe || performer.turnsOn || performer.turnsOff) && (
-            <div className="mt-4 pt-4 border-t border-border space-y-3">
+            <div className="flex gap-6 px-5 py-4">
               {performer.aboutMe && (
-                <div>
+                <div className="flex-1">
                   <p className="text-xs text-muted-foreground mb-1">About</p>
                   <p className="text-sm text-foreground">{performer.aboutMe}</p>
                 </div>
               )}
               {performer.turnsOn && (
-                <div>
+                <div className="flex-1">
                   <p className="text-xs text-muted-foreground mb-1">Turns On</p>
                   <p className="text-sm text-foreground">{performer.turnsOn}</p>
                 </div>
               )}
               {performer.turnsOff && (
-                <div>
+                <div className="flex-1">
                   <p className="text-xs text-muted-foreground mb-1">Turns Off</p>
                   <p className="text-sm text-foreground">{performer.turnsOff}</p>
                 </div>
@@ -216,7 +238,7 @@ export default function PerformerView() {
           )}
         </Section>
 
-        {/* Photos */}
+        {/* Photos & ID */}
         {(performer.profilePhoto || performer.idFront || performer.idBack || performer.faceId) && (
           <div className="bg-card border border-border rounded-xl p-5 lg:col-span-2">
             <h3 className="text-sm font-semibold text-foreground mb-4">Photos & ID</h3>
