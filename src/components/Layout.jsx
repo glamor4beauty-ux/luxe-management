@@ -23,11 +23,10 @@ export default function Layout() {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader className="p-5 border-b border-sidebar-border">
-          <h1 className="text-xl font-bold tracking-tight">
+          <h1 className="text-base font-bold tracking-tight leading-tight">
             <span className="text-primary">LUXE</span>
-            <span className="text-sidebar-foreground/50 font-light ml-1.5">MGMT</span>
+            <span className="text-sidebar-foreground font-light ml-1">Management Systems</span>
           </h1>
-          <p className="text-[10px] text-sidebar-foreground/40 mt-0.5 tracking-widest uppercase">Management Systems</p>
         </SidebarHeader>
         <SidebarContent className="p-3">
           <SidebarMenu>
@@ -53,7 +52,7 @@ export default function Layout() {
           <SidebarTrigger />
           <h1 className="text-lg font-bold">
             <span className="text-primary">LUXE</span>
-            <span className="text-foreground/50 font-light ml-1">MGMT</span>
+            <span className="text-foreground/70 font-light ml-1">Management Systems</span>
           </h1>
         </header>
         <div className="p-4 md:p-6 lg:p-8">
