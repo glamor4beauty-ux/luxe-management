@@ -15,6 +15,7 @@ import CalendarPage from './pages/CalendarPage';
 import StripchatPage from './pages/StripchatPage';
 import Payouts from './pages/Payouts';
 import Tasks from './pages/Tasks';
+import Register from './pages/Register';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -53,6 +54,7 @@ const AuthenticatedApp = () => {
         <Route path="/stripchat" element={<StripchatPage />} />
         <Route path="/payouts" element={<Payouts />} />
         <Route path="/tasks" element={<Tasks />} />
+        <Route path="/register" element={<Register />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
