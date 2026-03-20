@@ -75,7 +75,7 @@ export default function Users() {
     const data = editingData[userId];
     if (!data) return false;
     const user = users.find(u => u.id === userId);
-    return data.full_name !== user?.full_name || data.email !== user?.email || data.password !== user?.password || data.stageName !== user?.stageName;
+    return data.full_name !== user?.full_name || data.email !== user?.email || data.password !== user?.password || data.stageName !== user?.stageName || data.role !== user?.role;
   };
 
   const handleAddUser = async () => {
@@ -265,6 +265,7 @@ export default function Users() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stage Name</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Password</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -315,6 +316,19 @@ export default function Users() {
                             </Button>
                           )}
                         </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Select value={editingData[u.id]?.role ?? u.role} onValueChange={v => handleEditChange(u.id, 'role', v)}>
+                          <SelectTrigger className="bg-secondary border-border text-foreground h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card border-border">
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="recruiter">Recruiter</SelectItem>
+                            <SelectItem value="performer">Performer</SelectItem>
+                            <SelectItem value="user">User</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </td>
                     </tr>
                   ))}
