@@ -1,4 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import AdminNotifications from './AdminNotifications';
 import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -107,6 +108,7 @@ export default function Layout() {
           <Outlet />
         </div>
       </SidebarInset>
+      <AdminNotifications />
     </SidebarProvider>
   );
 }
