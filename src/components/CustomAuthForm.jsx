@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 
 export default function CustomAuthForm() {
   const navigate = useNavigate();
+  const { setUser } = useAuth() || {};
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,7 @@ export default function CustomAuthForm() {
       if (res.data.success && res.data.user) {
         const user = res.data.user;
         localStorage.setItem('auth_user', JSON.stringify(user));
+        if (setUser) setUser(user);
 
         if (user.role === 'performer') {
           navigate('/');
