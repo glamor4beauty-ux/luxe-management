@@ -9,18 +9,27 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Email and password required' }, { status: 400 });
     }
 
-    // Fetch user from User entity
     const users = await base44.asServiceRole.entities.User.filter({ email });
-    
+
     if (users.length === 0) {
       return Response.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
 
     const user = users[0];
 
-    // Simple password check (in production, use bcrypt or similar)
     if (user.password !== password) {
       return Response.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // If performer, check approval status
+    if (user.role === 'performer') {
+      const performers = await base44.asServiceRole.entities.Performer.filter({ email });
+      if (performers.length > 0 && performers[0].approved === false) {
+        return Response.json({
+          success: false,
+          error: 'Your application is pending admin approval. You will be notified once approved.'
+        }, { status: 403 });
+      }
     }
 
     return Response.json({

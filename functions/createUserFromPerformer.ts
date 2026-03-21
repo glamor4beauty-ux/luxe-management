@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
 const ADMIN_EMAIL = 'glamor4beauty@gmail.com';
-const APP_URL = 'https://app.base44.com'; // update if custom domain
+const APP_URL = 'https://app.base44.com';
 
 Deno.serve(async (req) => {
   try {
@@ -12,7 +12,12 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
-    // 1. Create User record
+    // 1. Mark performer as pending approval
+    if (data.id) {
+      await base44.asServiceRole.entities.Performer.update(data.id, { approved: false });
+    }
+
+    // 2. Create User record
     const user = await base44.asServiceRole.entities.User.create({
       email: data.email,
       full_name: `${data.firstName} ${data.lastName}`,
@@ -23,7 +28,7 @@ Deno.serve(async (req) => {
 
     const loginUrl = `${APP_URL}/auth`;
 
-    // 2. Send welcome email to performer
+    // 3. Send welcome email to performer
     await base44.asServiceRole.integrations.Core.SendEmail({
       from_name: 'LUXE Management Systems',
       to: data.email,
@@ -48,11 +53,11 @@ Login URL: ${loginUrl}
 Login Instructions:
 1. Visit the login URL above
 2. Enter your email and password
-3. You will be directed to your performer dashboard
+3. You will be directed to your performer dashboard once approved
 
 ─────────────────────────
 
-Once your application is approved, you will have full access to your performer portal including your schedule, earnings, and profile.
+Once your application is approved by our admin team, you will have full access to your performer portal including your schedule, earnings, and profile.
 
 If you have any questions, reply to this email or contact support.
 
@@ -60,7 +65,7 @@ Warm regards,
 LUXE Management Systems Team`
     });
 
-    // 3. Send submission summary email to admin
+    // 4. Send submission summary to admin
     const fields = [
       ['First Name', data.firstName],
       ['Last Name', data.lastName],
@@ -107,7 +112,7 @@ LUXE Management Systems Team`
       from_name: 'LUXE Management Systems',
       to: ADMIN_EMAIL,
       subject: `New Performer Application: ${data.firstName} ${data.lastName} (@${data.stageName})`,
-      body: `A new performer application has been submitted.
+      body: `A new performer application has been submitted and is PENDING YOUR APPROVAL.
 
 ─────────────────────────
 SUBMISSION DETAILS
@@ -124,7 +129,7 @@ Face + ID: ${data.faceId || 'Not uploaded'}
 ─────────────────────────
 Submitted on: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}
 
-Review this application in the performers section of the admin panel.`
+ACTION REQUIRED: Log in to the admin panel and approve or reject this application from the Performers section.`
     });
 
     return Response.json({ success: true, userId: user.id });
