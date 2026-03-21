@@ -12,6 +12,11 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
+    // Skip everything for manual entries (emails + approval already handled)
+    if (data.manualEntry) {
+      return Response.json({ success: true, skipped: true });
+    }
+
     // 1. Mark performer as pending approval
     if (data.id) {
       await base44.asServiceRole.entities.Performer.update(data.id, { approved: false });

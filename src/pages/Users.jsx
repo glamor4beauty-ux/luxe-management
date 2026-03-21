@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Mail, Loader2, Save } from 'lucide-react';
+import { Mail, Loader2, Save, UserPlus } from 'lucide-react';
+import ManualPerformerDialog from '../components/ManualPerformerDialog';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ export default function Users() {
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer' });
   const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', role: 'performer' });
   const [editingData, setEditingData] = useState({});
+  const [manualDialogOpen, setManualDialogOpen] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -127,6 +129,9 @@ export default function Users() {
           <p className="text-sm text-muted-foreground mt-1">Manage user accounts</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={() => setManualDialogOpen(true)} variant="outline" className="border-border">
+            <UserPlus className="h-4 w-4 mr-2" /> Add Performer
+          </Button>
           <Button onClick={() => setAddDialogOpen(true)} className="bg-primary text-primary-foreground">
             Add User
           </Button>
@@ -135,6 +140,8 @@ export default function Users() {
           </Button>
         </div>
       </div>
+
+      <ManualPerformerDialog open={manualDialogOpen} onOpenChange={setManualDialogOpen} onSuccess={loadUsers} />
 
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="bg-card border-border max-w-sm">
