@@ -39,6 +39,11 @@ export default function Performers() {
     setPerformers(prev => prev.filter(p => p.id !== id));
   };
 
+  const handleApprove = async (id) => {
+    await base44.entities.Performer.update(id, { approved: true });
+    setPerformers(prev => prev.map(p => p.id === id ? { ...p, approved: true } : p));
+  };
+
   const filtered = performers.filter(p => {
     const q = search.toLowerCase();
     return !q || 
@@ -122,6 +127,7 @@ export default function Performers() {
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Stage Name</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Email</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Phone</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Status</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -154,6 +160,16 @@ export default function Performers() {
                           onClick={e => e.stopPropagation()}
                         >{p.phone}</a>
                       ) : '-'}
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      {p.approved === false ? (
+                        <button
+                          onClick={() => handleApprove(p.id)}
+                          className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 hover:bg-green-500/10 hover:text-green-400 transition-colors font-medium"
+                        >Pending — Approve</button>
+                      ) : (
+                        <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 font-medium">Approved</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
