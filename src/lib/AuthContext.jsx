@@ -14,7 +14,17 @@ export const AuthProvider = ({ children }) => {
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
-    checkAppState();
+    // Check for custom auth user in localStorage
+    const stored = localStorage.getItem('auth_user');
+    if (stored) {
+      try {
+        const u = JSON.parse(stored);
+        setUser(u);
+        setIsAuthenticated(true);
+      } catch {}
+    }
+    setIsLoadingAuth(false);
+    setIsLoadingPublicSettings(false);
   }, []);
 
   const checkAppState = async () => {
@@ -110,17 +120,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = () => {
+    localStorage.removeItem('auth_user');
     setUser(null);
     setIsAuthenticated(false);
-    
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
-    }
   };
 
   const navigateToLogin = () => {
