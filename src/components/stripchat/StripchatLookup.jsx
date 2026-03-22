@@ -65,10 +65,16 @@ export default function StripchatLookup({ stageName, onAccountFound }) {
             <p className="text-xs text-muted-foreground mb-1">Username</p>
             <p className="text-sm font-medium text-foreground">{result.username}</p>
           </div>
+          {result.earnings !== undefined && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Earnings</p>
+              <p className="text-sm font-medium text-primary">${result.earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+          )}
           {result.followers > 0 && (
             <div>
               <p className="text-xs text-muted-foreground mb-1">Followers</p>
-              <p className="text-sm font-medium text-primary">{result.followers.toLocaleString()}</p>
+              <p className="text-sm font-medium text-foreground">{result.followers.toLocaleString()}</p>
             </div>
           )}
           {result.profileUrl && (
