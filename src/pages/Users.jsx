@@ -16,7 +16,7 @@ export default function Users() {
   const [inviting, setInviting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer' });
+  const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer', manualEntry: false, password: '' });
   const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', role: 'performer' });
   const [editingData, setEditingData] = useState({});
   const [manualDialogOpen, setManualDialogOpen] = useState(false);
@@ -115,7 +115,7 @@ export default function Users() {
       });
       toast.success('Invite email sent with password');
       setDialogOpen(false);
-      setInviteForm({ email: '', role: 'performer' });
+
     } catch (e) {
       toast.error('Failed to send invite');
     }
@@ -228,11 +228,34 @@ export default function Users() {
                 </SelectContent>
               </Select>
             </div>
-            <p className="text-xs text-muted-foreground bg-secondary/50 rounded p-2">An invite email with login instructions and a temporary password will be sent.</p>
+            <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="manualEntry"
+                  className="accent-primary"
+                  checked={inviteForm.manualEntry}
+                  onChange={e => setInviteForm(f => ({ ...f, manualEntry: e.target.checked }))}
+                />
+                <Label htmlFor="manualEntry" className="text-xs text-muted-foreground cursor-pointer">Manual entry (no email — set password directly)</Label>
+              </div>
+              {inviteForm.manualEntry ? (
+                <div>
+                  <Label className="text-xs text-muted-foreground">Password</Label>
+                  <Input
+                    type="text"
+                    value={inviteForm.password}
+                    onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))}
+                    placeholder="Set password"
+                    className="bg-secondary border-border text-foreground h-9 mt-1"
+                  />
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground bg-secondary/50 rounded p-2">An invite email with login instructions and a temporary password will be sent.</p>
+              )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-border">Cancel</Button>
               <Button onClick={handleSendInvite} className="bg-primary text-primary-foreground">
-                <Mail className="h-4 w-4 mr-2" />Send Invite
+                {inviteForm.manualEntry ? 'Create User' : <><Mail className="h-4 w-4 mr-2" />Send Invite</>}
               </Button>
             </div>
           </div>
