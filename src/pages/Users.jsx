@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { appParams } from '@/lib/app-params';
+
+const callFn = async (payload) => {
+  const res = await fetch(`/api/apps/${appParams.appId}/functions/prod/manageUserCredential`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
 import { Mail, Loader2, Save, UserPlus, Eye, EyeOff } from 'lucide-react';
 import ManualPerformerDialog from '../components/ManualPerformerDialog';
 import { Button } from "@/components/ui/button";
