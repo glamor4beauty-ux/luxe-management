@@ -22,12 +22,22 @@ Deno.serve(async (req) => {
     });
 
     // Create User record
-    await base44.asServiceRole.entities.User.create({
+    const newUser = await base44.asServiceRole.entities.User.create({
       email: performerData.email,
       full_name: `${performerData.firstName} ${performerData.lastName}`,
       role: 'performer',
       stageName: performerData.stageName || '',
       password: performerData.password || '',
+    });
+
+    // Sync to UserCredentials for login
+    await base44.asServiceRole.entities.UserCredentials.create({
+      userId: newUser.id,
+      email: performerData.email,
+      password: performerData.password || '',
+      role: 'performer',
+      stageName: performerData.stageName || '',
+      full_name: `${performerData.firstName} ${performerData.lastName}`,
     });
 
     return Response.json({ success: true, performerId: performer.id });
