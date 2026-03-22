@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Search, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,12 @@ export default function StripchatLookup({ stageName, onAccountFound }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [searched, setSearched] = useState(false);
+
+  useEffect(() => {
+    if (stageName) {
+      handleLookup();
+    }
+  }, [stageName]);
 
   const handleLookup = async () => {
     if (!stageName) {
@@ -36,21 +42,6 @@ export default function StripchatLookup({ stageName, onAccountFound }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input
-          value={stageName}
-          disabled
-          className="bg-secondary border-border text-foreground flex-1"
-          placeholder="Stage name"
-        />
-        <Button
-          onClick={handleLookup}
-          disabled={loading}
-          className="bg-primary text-primary-foreground"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-        </Button>
-      </div>
 
       {searched && result?.error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start gap-3">
