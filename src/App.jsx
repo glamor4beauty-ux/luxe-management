@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -39,7 +39,7 @@ const AuthenticatedApp = () => {
   const getLandingPage = () => {
     if (!user) return <Dashboard />;
     if (user.role === 'recruiter') return <RecruiterDashboard />;
-    if (user.role === 'performer') return <PerformerDashboard />;
+    if (user.role === 'performer') return <Navigate to="/performer-dashboard" replace />;
     return <Dashboard />; // admin/default
   };
 
@@ -72,10 +72,8 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/auth" element={<CustomAuthForm />} />
-      <Route element={<PerformerMobileLayout />}>
-        <Route path="/" element={user?.role === 'performer' ? <PerformerDashboard /> : <Dashboard />} />
-      </Route>
       <Route element={<Layout />}>
+        <Route path="/" element={getLandingPage()} />
         <Route path="/performers" element={<Performers />} />
         <Route path="/performers/new" element={<PerformerForm />} />
         <Route path="/performers/:id" element={<PerformerView />} />
@@ -91,6 +89,7 @@ const AuthenticatedApp = () => {
         <Route path="/shifts-dashboard" element={<ShiftsDashboard />} />
       </Route>
       <Route element={<PerformerMobileLayout />}>
+        <Route path="/performer-dashboard" element={<PerformerDashboard />} />
         <Route path="/performer-performance" element={<MyPerformance />} />
         <Route path="/performer-instructions" element={<Instructions />} />
         <Route path="/performer-schedule" element={<PerformerShifts />} />
