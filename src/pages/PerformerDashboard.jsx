@@ -37,9 +37,7 @@ function Accordion({ performer, title, fields }) {
         </div>
       )}
     </div>
-    <PerformerBottomNav />
-    </>
-  );
+    );
 }
 
 export default function PerformerDashboard() {
@@ -136,7 +134,6 @@ export default function PerformerDashboard() {
   }
 
   return (
-    <>
     <div className="space-y-6 pb-24 md:pb-0">
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-1">Welcome back, {user?.full_name}!</h1>
@@ -369,5 +366,6 @@ export default function PerformerDashboard() {
         </div>
       )}
     </div>
+    <PerformerBottomNav />
   );
 }
