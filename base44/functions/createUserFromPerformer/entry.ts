@@ -31,6 +31,16 @@ Deno.serve(async (req) => {
       password: data.password || '',
     });
 
+    // Sync to UserCredentials for login
+    await base44.asServiceRole.entities.UserCredentials.create({
+      userId: user.id,
+      email: data.email,
+      password: data.password || '',
+      role: 'performer',
+      stageName: data.stageName || '',
+      full_name: `${data.firstName} ${data.lastName}`,
+    });
+
     const loginUrl = `${APP_URL}/auth`;
 
     // 3. Send welcome email to performer
