@@ -28,6 +28,7 @@ export default function StripchatPage() {
   const [form, setForm] = useState({ ...emptyForm });
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -61,6 +62,27 @@ export default function StripchatPage() {
   const handleDelete = async (id) => {
     await base44.entities.Stripchat.delete(id);
     setProfiles(prev => prev.filter(p => p.id !== id));
+  };
+
+  const syncFromAPI = async (stageName, id) => {
+    setSyncing(id);
+    try {
+      const res = await base44.functions.invoke('stripchatLookup', { stageName });
+      if (res.data.success) {
+        await base44.entities.Stripchat.update(id, {
+          followers: res.data.followers || 0,
+          earnings: res.data.earnings || 0,
+          profileUrl: res.data.profileUrl || ''
+        });
+        toast.success('Data synced from API!');
+        load();
+      } else {
+        toast.error(res.data.error || 'Sync failed');
+      }
+    } catch (e) {
+      toast.error('Sync failed: ' + (e.message || ''));
+    }
+    setSyncing(null);
   };
 
   const filtered = profiles.filter(p => {
@@ -128,6 +150,9 @@ export default function StripchatPage() {
                     <td className="px-4 py-3 text-primary font-medium hidden sm:table-cell">${p.earnings || 0}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" disabled={syncing === p.id} onClick={() => syncFromAPI(p.stageName, p.id)} title="Sync from Stripchat API">
+                          {syncing === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="text-xs font-bold">↺</span>}
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(p)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
