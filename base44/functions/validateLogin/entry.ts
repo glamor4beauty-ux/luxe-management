@@ -36,15 +36,13 @@ Deno.serve(async (req) => {
     let stageName = cred.stageName || null;
     if (!stageName && cred.role === 'performer') {
       const performers = await base44.asServiceRole.entities.Performer.filter({ email: cred.email });
-      if (performers.length > 0) stageName = performers[0].stageName || null;
-    }
-
-    // Persist stageName to User entity if performer
-    if (cred.role === 'performer' && stageName) {
-      try {
-        await base44.asServiceRole.entities.User.update(cred.userId || cred.id, { stageName });
-      } catch (e) {
-        // Silently fail if update doesn't work
+      if (performers.length > 0) {
+        stageName = performers[0].stageName || null;
+      } else {
+        return Response.json({
+          success: false,
+          error: 'Performer record not found for this email. Contact support.'
+        }, { status: 404 });
       }
     }
 
