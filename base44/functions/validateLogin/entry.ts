@@ -32,6 +32,13 @@ Deno.serve(async (req) => {
       }
     }
 
+    // If stageName not in credentials, look it up from Performer entity
+    let stageName = cred.stageName || null;
+    if (!stageName && cred.role === 'performer') {
+      const performers = await base44.asServiceRole.entities.Performer.filter({ email: cred.email });
+      if (performers.length > 0) stageName = performers[0].stageName || null;
+    }
+
     return Response.json({
       success: true,
       user: {
@@ -39,7 +46,7 @@ Deno.serve(async (req) => {
         email: cred.email,
         full_name: cred.full_name,
         role: cred.role,
-        stageName: cred.stageName || null
+        stageName
       }
     });
   } catch (error) {
