@@ -209,29 +209,6 @@ export default function PerformerView() {
         </details>
       </div>
 
-      {/* Profile Photos */}
-      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-        <h2 className="text-lg font-semibold text-foreground">Profile Photos</h2>
-        {[{ key: 'profilePhoto', label: 'Profile Photo' }, { key: 'idFront', label: 'ID Front' }, { key: 'idBack', label: 'ID Back' }, { key: 'faceId', label: 'Face + ID' }].map(photo => (
-          <div key={photo.key} className="flex items-center justify-between gap-3 bg-secondary/50 rounded-lg p-3">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">{photo.label}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {performer[photo.key] ? (
-                <img src={performer[photo.key]} alt={photo.label} className="h-12 w-12 rounded object-cover border border-border" />
-              ) : (
-                <div className="h-12 w-12 rounded bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">None</div>
-              )}
-              <Button size="sm" variant="outline" onClick={() => handlePhotoUpload(photo.key)} disabled={uploadingPhoto} className="border-border h-8 text-xs">
-                {uploadingPhoto ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
-                Upload
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* Personal Info */}
       <div className="bg-card border border-border rounded-lg p-4 space-y-3 text-sm">
         <h2 className="text-lg font-semibold text-foreground">Personal Info</h2>
@@ -457,6 +434,29 @@ export default function PerformerView() {
 
       {/* Tasks */}
       <PerformerTasks performer={performer} />
+
+      {/* Profile Photos */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+        <h2 className="text-lg font-semibold text-foreground">Profile Photos</h2>
+        {[{ key: 'profilePhoto', label: 'Profile Photo' }, { key: 'idFront', label: 'ID Front' }, { key: 'idBack', label: 'ID Back' }, { key: 'faceId', label: 'Face + ID' }].map(photo => (
+          <div key={photo.key} className="flex items-center justify-between gap-3 bg-secondary/50 rounded-lg p-3">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">{photo.label}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {performer[photo.key] ? (
+                <img src={performer[photo.key]} alt={photo.label} className="h-12 w-12 rounded object-cover border border-border" />
+              ) : (
+                <div className="h-12 w-12 rounded bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">None</div>
+              )}
+              <Button size="sm" variant="outline" onClick={() => handlePhotoUpload(photo.key)} disabled={uploadingPhoto} className="border-border h-8 text-xs">
+                {uploadingPhoto ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}
+                Upload
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
