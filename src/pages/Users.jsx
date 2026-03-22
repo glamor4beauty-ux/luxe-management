@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Mail, Loader2, Save, UserPlus } from 'lucide-react';
+import { Mail, Loader2, Save, UserPlus, Eye, EyeOff } from 'lucide-react';
 import ManualPerformerDialog from '../components/ManualPerformerDialog';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,8 @@ export default function Users() {
   const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', role: 'performer' });
   const [editingData, setEditingData] = useState({});
   const [manualDialogOpen, setManualDialogOpen] = useState(false);
+  const [showAddPassword, setShowAddPassword] = useState(false);
+  const [showInvitePassword, setShowInvitePassword] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -106,18 +108,33 @@ export default function Users() {
       toast.error('Email required');
       return;
     }
+    if (inviteForm.manualEntry && !inviteForm.password) {
+      toast.error('Password required for manual entry');
+      return;
+    }
     try {
-      const password = Math.random().toString(36).slice(-8);
-      await base44.integrations.Core.SendEmail({
-        to: inviteForm.email,
-        subject: 'Welcome to LUXE Management Systems - Your Login Credentials',
-        body: `Welcome to LUXE Management Systems!\n\nHere are your login details:\n\nEmail: ${inviteForm.email}\nPassword: ${password}\nRole: ${inviteForm.role}\n\nPlease log in at the app and change your password immediately.\n\nIf you have any questions, contact support.`
-      });
-      toast.success('Invite email sent with password');
+      if (inviteForm.manualEntry) {
+        await base44.asServiceRole.entities.User.create({
+          email: inviteForm.email,
+          full_name: inviteForm.email.split('@')[0],
+          role: inviteForm.role,
+          password: inviteForm.password
+        });
+        toast.success('User created successfully');
+        loadUsers();
+      } else {
+        const password = Math.random().toString(36).slice(-8);
+        await base44.integrations.Core.SendEmail({
+          to: inviteForm.email,
+          subject: 'Welcome to LUXE Management Systems - Your Login Credentials',
+          body: `Welcome to LUXE Management Systems!\n\nHere are your login details:\n\nEmail: ${inviteForm.email}\nPassword: ${password}\nRole: ${inviteForm.role}\n\nPlease log in at the app and change your password immediately.\n\nIf you have any questions, contact support.`
+        });
+        toast.success('Invite email sent with password');
+      }
       setDialogOpen(false);
-
+      setInviteForm({ email: '', role: 'performer', manualEntry: false, password: '' });
     } catch (e) {
-      toast.error('Failed to send invite');
+      toast.error('Failed: ' + (e.message || 'Unknown error'));
     }
   };
 
@@ -169,13 +186,18 @@ export default function Users() {
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Password</Label>
-              <Input 
-                value={addForm.password} 
-                onChange={e => setAddForm(f => ({ ...f, password: e.target.value }))} 
-                placeholder="Set password" 
-                type="password" 
-                className="bg-secondary border-border text-foreground h-9 mt-1" 
-              />
+              <div className="relative mt-1">
+                <Input 
+                  value={addForm.password} 
+                  onChange={e => setAddForm(f => ({ ...f, password: e.target.value }))} 
+                  placeholder="Set password" 
+                  type={showAddPassword ? 'text' : 'password'} 
+                  className="bg-secondary border-border text-foreground h-9 pr-9" 
+                />
+                <button type="button" onClick={() => setShowAddPassword(v => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showAddPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Role</Label>
@@ -241,13 +263,18 @@ export default function Users() {
               {inviteForm.manualEntry ? (
                 <div>
                   <Label className="text-xs text-muted-foreground">Password</Label>
-                  <Input
-                    type="text"
-                    value={inviteForm.password}
-                    onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))}
-                    placeholder="Set password"
-                    className="bg-secondary border-border text-foreground h-9 mt-1"
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      type={showInvitePassword ? 'text' : 'password'}
+                      value={inviteForm.password}
+                      onChange={e => setInviteForm(f => ({ ...f, password: e.target.value }))}
+                      placeholder="Set password"
+                      className="bg-secondary border-border text-foreground h-9 pr-9"
+                    />
+                    <button type="button" onClick={() => setShowInvitePassword(v => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showInvitePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground bg-secondary/50 rounded p-2">An invite email with login instructions and a temporary password will be sent.</p>
