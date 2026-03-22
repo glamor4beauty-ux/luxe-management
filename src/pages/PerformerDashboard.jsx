@@ -227,41 +227,7 @@ export default function PerformerDashboard() {
         </div>
       )}
 
-      {/* Stats Row - Compact */}
-      <div className="flex gap-3 items-center">
-        <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
-          <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Calendar className="h-3.5 w-3.5 text-primary" />
-          </div>
-          <div className="text-xs">
-            <p className="text-muted-foreground">Shifts</p>
-            <p className="font-bold text-foreground">{upcomingShifts.length}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
-          <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Clock className="h-3.5 w-3.5 text-primary" />
-          </div>
-          <div className="text-xs">
-            <p className="text-muted-foreground">Hours</p>
-            <p className="font-bold text-foreground">{weeklyHours}h</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
-          <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <GraduationCap className="h-3.5 w-3.5 text-primary" />
-          </div>
-          <div className="text-xs">
-            {classroomAssignment ? (
-              <a href={classroomAssignment.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
-                Open
-              </a>
-            ) : (
-              <p className="text-muted-foreground">No assignment</p>
-            )}
-          </div>
-        </div>
-      </div>
+
 
       {/* Upcoming Shifts */}
       <div>
