@@ -52,7 +52,7 @@ export default function CustomAuthForm() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             <span className="text-primary">LUXE</span>
-            <span className="text-foreground/60 font-light ml-2">Management</span>
+            <span className="text-foreground/60 font-light ml-2">Talent Systems</span>
           </h1>
           <p className="text-sm text-muted-foreground">Sign in to your account</p>
         </div>
