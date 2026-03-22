@@ -41,7 +41,7 @@ export default function Users() {
     setLoading(true);
     try {
       const res = await callFn({ action: 'list' });
-      const creds = res.data.creds || [];
+      const creds = res.creds || [];
       const mapped = creds.map(c => ({
         id: c.userId || c.id,
         _credId: c.id,
@@ -100,7 +100,7 @@ export default function Users() {
         userId: user.id,
       };
       const res = await callFn({ action: 'update', credId: user._credId, data: credData });
-      if (!res.data.success) throw new Error(res.data.error);
+      if (!res.success) throw new Error(res.error);
       toast.success('User updated');
       setEditingData(prev => ({ ...prev, [userId]: undefined }));
       loadUsers();
