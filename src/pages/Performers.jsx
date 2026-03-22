@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare, Mail } from 'lucide-react';
+import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare, Mail, GraduationCap, ShieldCheck, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImportExportBar from "../components/performers/ImportExportBar";
@@ -16,7 +16,8 @@ export default function Performers() {
   const [performers, setPerformers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [contactMode, setContactMode] = useState('phone'); // 'phone' or 'sms'
+  const [contactMode, setContactMode] = useState('phone');
+  const [activeTab, setActiveTab] = useState('roster');
   const isPerformer = user?.role === 'performer';
 
   const load = async () => {
@@ -63,9 +64,8 @@ export default function Performers() {
           <p className="text-sm text-muted-foreground mt-1">
             {user?.role === 'recruiter' ? 'My Performers' : 'All Performers'} ({performers.length})
           </p>
-          </div>
+        </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {/* SMS / Phone toggle */}
           <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
             <button
               onClick={() => setContactMode('phone')}
@@ -94,10 +94,32 @@ export default function Performers() {
               </Link>
             </>
           )}
-          </div>
+        </div>
       </div>
 
-      <div className="mb-4">
+      {/* Tabs */}
+      <div className="flex gap-1 bg-secondary rounded-lg p-1 mb-6 w-fit">
+        <button
+          onClick={() => setActiveTab('roster')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'roster' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <User className="h-4 w-4" /> Roster
+        </button>
+        <button
+          onClick={() => setActiveTab('classroom')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'classroom' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <GraduationCap className="h-4 w-4" /> Classroom Guide
+        </button>
+      </div>
+
+      {activeTab === 'classroom' && <ClassroomGuide userRole={user?.role} />}
+
+      {activeTab === 'roster' && <div className="mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -109,15 +131,17 @@ export default function Performers() {
         </div>
       </div>
 
-      {loading ? (
+      </div>}
+
+      {activeTab === 'roster' && loading ? (
         <div className="flex items-center justify-center h-40">
           <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : activeTab === 'roster' && filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <p>No performers found.</p>
         </div>
-      ) : (
+      ) : activeTab === 'roster' ? (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -208,7 +232,82 @@ export default function Performers() {
             </table>
           </div>
         </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ClassroomGuide({ userRole }) {
+  return (
+    <div className="space-y-6">
+      {/* Admin Section */}
+      {userRole === 'admin' && (
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Admin — Google Classroom Setup</h2>
+              <p className="text-xs text-muted-foreground">One-time setup required</p>
+            </div>
+          </div>
+          <ol className="space-y-4">
+            {[
+              { step: '1', title: 'Go to Google Classroom', body: 'Visit classroom.google.com and sign in with the same Google account connected to this app.' },
+              { step: '2', title: 'Create an Onboarding Course', body: 'Click the + button (top right) → "Create class". Name it something like LUXE Performer Onboarding. Leave other fields optional and click Create.' },
+              { step: '3', title: 'Keep the Course Active', body: 'The course must remain Active (not Archived). The system automatically posts an onboarding assignment to this course every time a new performer is approved.' },
+              { step: '4', title: 'Enroll Performers as Students (Optional)', body: 'To allow performers to see and complete assignments themselves: open the course → People tab → click the + icon under Students → enter the performer\'s email. Otherwise, assignments are visible only to you (the teacher) as an internal checklist.' },
+              { step: '5', title: 'What Gets Created Automatically', body: 'When a performer is approved, the system creates a published assignment titled "Onboarding: [Name] (@StageName)" with their details and a 7-day due date. It includes tasks: ID verification, profile photo review, platform walkthrough, first shift scheduling, and guideline review.' },
+            ].map(({ step, title, body }) => (
+              <li key={step} className="flex gap-4">
+                <span className="flex-shrink-0 h-7 w-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">{step}</span>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{title}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-5 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+            <p className="text-xs text-yellow-400"><strong>Note:</strong> The Google account used to authorize this app must be the one with the Classroom course — that's the account whose courses the system can access.</p>
+          </div>
+        </div>
       )}
+
+      {/* Performer Section */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+            <GraduationCap className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Performer — How to Use Google Classroom</h2>
+            <p className="text-xs text-muted-foreground">Share these instructions with new performers</p>
+          </div>
+        </div>
+        <ol className="space-y-4">
+          {[
+            { step: '1', title: 'Wait for Admin Enrollment', body: 'After your application is approved, the admin will add you as a student to the LUXE Performer Onboarding Google Classroom course. You\'ll receive an email invitation from Google Classroom.' },
+            { step: '2', title: 'Accept the Invitation', body: 'Open the email from Google Classroom and click "Join" or "Accept". You may be prompted to sign in or create a Google account if you don\'t have one.' },
+            { step: '3', title: 'Go to Google Classroom', body: 'Visit classroom.google.com and sign in with the Google account you used to accept the invite. You\'ll see the LUXE Performer Onboarding course on your dashboard.' },
+            { step: '4', title: 'Find Your Onboarding Assignment', body: 'Click on the course → go to the Classwork tab. You\'ll see an assignment with your name (e.g., "Onboarding: Jane Doe (@StageName)"). Click it to view the full checklist.' },
+            { step: '5', title: 'Complete Each Onboarding Task', body: 'Your assignment includes: completing ID verification, uploading your profile photo, attending a platform walkthrough, scheduling your first shift, and reviewing platform guidelines. Mark tasks as done as you complete them.' },
+            { step: '6', title: 'Turn In the Assignment', body: 'Once all tasks are complete, click "Turn In" on the assignment. This notifies the admin that your onboarding is finished.' },
+          ].map(({ step, title, body }) => (
+            <li key={step} className="flex gap-4">
+              <span className="flex-shrink-0 h-7 w-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">{step}</span>
+              <div>
+                <p className="text-sm font-medium text-foreground">{title}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">{body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-5 p-3 bg-secondary/50 border border-border rounded-lg">
+          <p className="text-xs text-muted-foreground"><strong className="text-foreground">Need help?</strong> Contact your manager or use the Support page in the app for assistance accessing Google Classroom.</p>
+        </div>
+      </div>
     </div>
   );
 }
