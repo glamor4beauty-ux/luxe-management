@@ -22,7 +22,7 @@ export default function PerformerMobileLayout() {
       <header className="bg-card border-b border-border px-4 py-3 sticky top-0 z-10">
         <h1 className="text-lg font-bold text-foreground mb-1">
           <span className="text-primary">LUXE</span>
-          <span className="text-foreground/60 font-light ml-2">Model Management</span>
+          <span className="text-foreground/60 font-light ml-2">Talent Systems</span>
         </h1>
         <p className="text-xs text-muted-foreground">Hi {user?.full_name}</p>
       </header>
