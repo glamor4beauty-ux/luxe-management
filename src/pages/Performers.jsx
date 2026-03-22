@@ -6,6 +6,7 @@ import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare, Mail, Graduati
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImportExportBar from "../components/performers/ImportExportBar";
+import PerformerProfileInfo from "../components/performers/PerformerProfileInfo";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -170,7 +171,12 @@ export default function Performers() {
                         <span className="font-medium text-foreground">{p.firstName} {p.lastName}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{p.stageName}</td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-2">
+                        <p className="text-foreground font-medium">{p.stageName || 'Not set'}</p>
+                        <PerformerProfileInfo stageName={p.stageName} />
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
                       {p.email ? (
                         <a href={`mailto:${p.email}`} className="hover:text-primary transition-colors" onClick={e => e.stopPropagation()}>{p.email}</a>
