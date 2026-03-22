@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import AdminNotifications from './AdminNotifications';
-import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
@@ -19,6 +19,7 @@ const adminNavItems = [
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
   { path: '/users', label: 'Users', icon: Settings },
+  { path: '/instructions', label: 'Instructions', icon: HelpCircle },
 ];
 
 const recruiterNavItems = [
