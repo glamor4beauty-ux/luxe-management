@@ -1,16 +1,13 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle, TrendingUp, LogOut, Home } from 'lucide-react';
+import { Home, BookOpen, ClipboardList, MessageSquare, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const topNavItems = [];
-
 const bottomNavItems = [
-  { path: '/performer-dashboard', label: 'Home', icon: Home },
-  { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
+  { path: '/performer-dashboard', label: 'Dashboard', icon: Home },
   { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
+  { path: '/performer-performance', label: 'Tasks', icon: ClipboardList },
   { path: '/performer-support', label: 'Support', icon: MessageSquare },
-  { path: '/performer-upload', label: 'Upload', icon: Upload },
 ];
 
 export default function PerformerMobileLayout() {
@@ -48,7 +45,27 @@ export default function PerformerMobileLayout() {
         </div>
       </main>
 
-
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-3 flex items-center justify-around">
+        {bottomNavItems.map(item => {
+          const active = location.pathname === item.path;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
+                active
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="text-xs font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
