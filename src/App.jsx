@@ -71,8 +71,10 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={!user ? <CustomAuthForm /> : getLandingPage()} />
       <Route path="/auth" element={<CustomAuthForm />} />
+      <Route element={<PerformerMobileLayout />}>
+        <Route path="/" element={user?.role === 'performer' ? <PerformerDashboard /> : <Dashboard />} />
+      </Route>
       <Route element={<Layout />}>
         <Route path="/performers" element={<Performers />} />
         <Route path="/performers/new" element={<PerformerForm />} />
