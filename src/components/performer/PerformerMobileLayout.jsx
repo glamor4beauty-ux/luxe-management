@@ -13,8 +13,8 @@ const bottomNavItems = [
   { path: '/performer-dashboard', label: 'Home', icon: Home },
   { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
   { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
-  { path: '/performer-upload', label: 'Upload', icon: Upload },
   { path: '/performer-support', label: 'Support', icon: MessageSquare },
+  { path: '/performer-upload', label: 'Upload', icon: Upload },
 ];
 
 export default function PerformerMobileLayout() {
