@@ -96,10 +96,13 @@ export default function Layout() {
               >
                 <LogOut className="h-3.5 w-3.5" /> Logout
               </button>
-            </nav>
-          )}
-      {/* Desktop Sidebar (always visible) */}
-        <SidebarProvider>
+              </nav>
+              )}
+              </header>
+              </div>
+
+              {/* Desktop Sidebar (always visible) */}
+              <SidebarProvider>
           <Sidebar>
             <SidebarHeader className="p-5 border-b border-sidebar-border">
               <h1 className="text-base font-bold tracking-tight leading-tight">
