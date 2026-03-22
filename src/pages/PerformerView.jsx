@@ -91,7 +91,7 @@ export default function PerformerView() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">{performer.firstName} {performer.lastName}</h1>
-            <p className="text-sm text-primary">@{performer.stageName}</p>
+            <p className="text-sm text-primary">@{performer.stageName || 'No stage name'}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -118,6 +118,63 @@ export default function PerformerView() {
             <Pencil className="h-4 w-4 mr-2" /> Edit
           </Button>
         </div>
+      </div>
+
+      {/* Quick Profile Info */}
+      <div className="bg-card border border-border rounded-lg p-5 space-y-4">
+        <div className="grid grid-cols-[100px_1fr] gap-4 items-start">
+          {/* Photo */}
+          <div>
+            {performer.profilePhoto ? (
+              <img src={performer.profilePhoto} alt={performer.stageName} className="h-24 w-24 rounded-lg object-cover border border-border" />
+            ) : (
+              <div className="h-24 w-24 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
+            )}
+          </div>
+          {/* Quick Info */}
+          <div className="space-y-2.5 text-sm">
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Recruiter</p>
+              <p className="font-medium text-foreground">{performer.recruiterName || '—'}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted-foreground">Phone:</p>
+              {performer.phone ? (
+                <a href={`tel:${performer.phone}`} className="font-medium text-primary hover:underline">{performer.phone}</a>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted-foreground">Age:</p>
+              <p className="font-medium text-foreground">{performer.displayAge || '—'}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted-foreground">DOB:</p>
+              {performer.dateOfBirth ? (
+                <p className="font-medium text-foreground">{new Date(performer.dateOfBirth).toLocaleDateString()}</p>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Accordion: Additional Details */}
+        <details className="group border-t border-border pt-3">
+          <summary className="flex cursor-pointer items-center justify-between text-sm font-medium text-foreground hover:text-primary transition-colors">
+            Additional Details
+            <span className="transition group-open:rotate-180">▼</span>
+          </summary>
+          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+            {performer.height && <div><p className="text-xs text-muted-foreground mb-0.5">Height</p><p className="text-foreground">{performer.height}</p></div>}
+            {performer.weight && <div><p className="text-xs text-muted-foreground mb-0.5">Weight</p><p className="text-foreground">{performer.weight}</p></div>}
+            {performer.eyeColor && <div><p className="text-xs text-muted-foreground mb-0.5">Eyes</p><p className="text-foreground">{performer.eyeColor}</p></div>}
+            {performer.hairColor && <div><p className="text-xs text-muted-foreground mb-0.5">Hair</p><p className="text-foreground">{performer.hairColor}</p></div>}
+            {performer.ethnicity && <div><p className="text-xs text-muted-foreground mb-0.5">Ethnicity</p><p className="text-foreground">{performer.ethnicity}</p></div>}
+            {performer.orientation && <div><p className="text-xs text-muted-foreground mb-0.5">Orientation</p><p className="text-foreground">{performer.orientation}</p></div>}
+          </div>
+        </details>
       </div>
 
       {/* Profile Photos */}
