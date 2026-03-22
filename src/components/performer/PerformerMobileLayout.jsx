@@ -63,11 +63,12 @@ export default function PerformerMobileLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center justify-center w-full py-2 transition-colors ${
+                className={`flex flex-col items-center justify-center w-full py-2 text-xs transition-colors ${
                   isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 mb-1" />
+                <span>{item.label}</span>
               </Link>
             );
           })}
