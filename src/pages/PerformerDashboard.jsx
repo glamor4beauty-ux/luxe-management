@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TrendingUp } from 'lucide-react';
 import StripchatLookup from '@/components/stripchat/StripchatLookup';
+import PerformerBottomNav from '@/components/performer/PerformerBottomNav';
 
 function Accordion({ performer, title, fields }) {
   const [open, setOpen] = useState(false);
@@ -36,6 +37,7 @@ function Accordion({ performer, title, fields }) {
         </div>
       )}
     </div>
+    <PerformerBottomNav />
   );
 }
 
@@ -133,7 +135,7 @@ export default function PerformerDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-0">
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-1">Welcome back, {user?.full_name}!</h1>
         <p className="text-muted-foreground mb-3">Stage name: <span className="text-primary font-medium">{performer?.stageName || user?.stageName}</span></p>
