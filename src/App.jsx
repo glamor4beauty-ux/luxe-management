@@ -31,6 +31,7 @@ import Users from './pages/Users';
 import Instructions from './pages/Instructions';
 import ShiftsDashboard from './pages/ShiftsDashboard';
 import PerformerTasks from './pages/PerformerTasks';
+import AdminKnowledgeBase from './pages/AdminKnowledgeBase';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/instructions" element={<Instructions />} />
         <Route path="/shifts-dashboard" element={<ShiftsDashboard />} />
+        <Route path="/knowledge-base" element={<AdminKnowledgeBase />} />
       </Route>
       <Route element={<PerformerMobileLayout />}>
         <Route path="/performer-dashboard" element={<PerformerDashboard />} />
