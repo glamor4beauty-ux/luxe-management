@@ -59,8 +59,8 @@ export default function Layout() {
 
   return (
     <>
-      {/* Mobile / Tablet Top Nav (hidden on xl+) */}
-      <div className="xl:hidden flex flex-col min-h-screen">
+      {/* Desktop Layout Only */}
+      <div className="hidden xl:block min-h-screen">
         <header className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-bold">
@@ -98,14 +98,7 @@ export default function Layout() {
               </button>
             </nav>
           )}
-        </header>
-        <main className="flex-1 p-4">
-          <Outlet />
-        </main>
-      </div>
-
-      {/* Desktop Sidebar (hidden below xl) */}
-      <div className="hidden xl:block">
+      {/* Desktop Sidebar (always visible) */}
         <SidebarProvider>
           <Sidebar>
             <SidebarHeader className="p-5 border-b border-sidebar-border">
@@ -148,8 +141,7 @@ export default function Layout() {
             </div>
           </SidebarInset>
           <AdminNotifications />
-        </SidebarProvider>
-      </div>
-    </>
-  );
+          </SidebarProvider>
+          </>
+          );
 }
