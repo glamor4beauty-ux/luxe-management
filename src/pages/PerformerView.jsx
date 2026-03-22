@@ -213,17 +213,133 @@ export default function PerformerView() {
       <div className="bg-card border border-border rounded-lg p-4">
         <h2 className="text-lg font-semibold text-foreground mb-3">Personal Info</h2>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <div>
+            <p className="text-xs text-muted-foreground">First Name</p>
+            <p className="font-medium text-foreground">{performer.firstName}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Last Name</p>
+            <p className="font-medium text-foreground">{performer.lastName}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Stage Name (Read-only)</p>
+            <p className="font-medium text-foreground bg-secondary/50 rounded px-3 py-2">{performer.stageName}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Email</p>
+            <a href={`mailto:${performer.email}`} className="font-medium text-primary hover:underline break-all">{performer.email}</a>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Phone</p>
+            <a href={contactMode === 'sms' ? `sms:${performer.phone}` : `tel:${performer.phone}`} className="font-medium text-primary hover:underline break-all">{performer.phone || '-'}</a>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Date of Birth</p>
+            <p className="font-medium text-foreground">{performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Display Age</p>
+            <p className="font-medium text-foreground">{performer.displayAge || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Recruiter</p>
+            <p className="font-medium text-foreground">{performer.recruiterName || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Applying For</p>
+            <p className="font-medium text-foreground">{performer.applyingFor || '-'}</p>
+          </div>
+        </div>
+      </div>
 
-      {/* Location */
+      {/* Location */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h2 className="text-lg font-semibold text-foreground mb-3">Location</h2>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <div>
+            <p className="text-xs text-muted-foreground">Street Address</p>
+            <p className="font-medium text-foreground">{performer.streetAddress || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">City</p>
+            <p className="font-medium text-foreground">{performer.city || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">State</p>
+            <p className="font-medium text-foreground">{performer.state || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Country</p>
+            <p className="font-medium text-foreground">{performer.country || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Zip Code</p>
+            <p className="font-medium text-foreground">{performer.zipCode || '-'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Languages */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h2 className="text-lg font-semibold text-foreground mb-3">Languages</h2>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <div>
+            <p className="text-xs text-muted-foreground">Primary Language</p>
+            <p className="font-medium text-foreground">{performer.primaryLanguage || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Other Language</p>
+            <p className="font-medium text-foreground">{performer.otherLanguage || '-'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Physical Attributes */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h2 className="text-lg font-semibold text-foreground mb-3">Physical Attributes</h2>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <div>
+            <p className="text-xs text-muted-foreground">Height</p>
+            <p className="font-medium text-foreground">{performer.height || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Weight</p>
+            <p className="font-medium text-foreground">{performer.weight || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Build</p>
+            <p className="font-medium text-foreground">{performer.build || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Ethnicity</p>
+            <p className="font-medium text-foreground">{performer.ethnicity || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Eye Color</p>
+            <p className="font-medium text-foreground">{performer.eyeColor || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Hair Color</p>
+            <p className="font-medium text-foreground">{performer.hairColor || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Hair Length</p>
+            <p className="font-medium text-foreground">{performer.hairLength || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Breast Size</p>
+            <p className="font-medium text-foreground">{performer.breastSize || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Butt Size</p>
+            <p className="font-medium text-foreground">{performer.buttSize || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Dress Size</p>
+            <p className="font-medium text-foreground">{performer.dressSize || '-'}</p>
+          </div>
+        </div>
+      </div>
       <div className="bg-card border border-border rounded-lg p-4">
         <h2 className="text-lg font-semibold text-foreground mb-3">Preferences</h2>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm mb-3">
