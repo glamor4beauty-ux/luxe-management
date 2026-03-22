@@ -90,41 +90,39 @@ export default function PerformerDashboard() {
         <p className="text-muted-foreground">Stage name: <span className="text-primary font-medium">{performer?.stageName || 'Not set'}</span></p>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">Upcoming Shifts</p>
+      {/* Stats Row - Compact */}
+      <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+          <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Calendar className="h-3.5 w-3.5 text-primary" />
           </div>
-          <p className="text-3xl font-bold text-foreground">{upcomingShifts.length}</p>
+          <div className="text-xs">
+            <p className="text-muted-foreground">Shifts</p>
+            <p className="font-bold text-foreground">{upcomingShifts.length}</p>
+          </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Clock className="h-4 w-4 text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">Hours This Week</p>
+        <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+          <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Clock className="h-3.5 w-3.5 text-primary" />
           </div>
-          <p className="text-3xl font-bold text-foreground">{weeklyHours}<span className="text-base font-normal text-muted-foreground ml-1">hrs</span></p>
+          <div className="text-xs">
+            <p className="text-muted-foreground">Hours</p>
+            <p className="font-bold text-foreground">{weeklyHours}h</p>
+          </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <GraduationCap className="h-4 w-4 text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground">Onboarding</p>
+        <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+          <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <GraduationCap className="h-3.5 w-3.5 text-primary" />
           </div>
-          {classroomAssignment ? (
-            <a href={classroomAssignment.url} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
-              Open Assignment <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          ) : (
-            <p className="text-sm text-muted-foreground">No assignment yet</p>
-          )}
+          <div className="text-xs">
+            {classroomAssignment ? (
+              <a href={classroomAssignment.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
+                Open
+              </a>
+            ) : (
+              <p className="text-muted-foreground">No assignment</p>
+            )}
+          </div>
         </div>
       </div>
 
