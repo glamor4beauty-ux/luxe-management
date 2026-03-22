@@ -1,10 +1,10 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle, TrendingUp, LogOut } from 'lucide-react';
+import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle, TrendingUp, LogOut, Home } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const navItems = [
-  { path: '/performer-dashboard', label: 'Home', icon: Calendar },
+  { path: '/performer-dashboard', label: 'Home', icon: Home },
   { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
   { path: '/performer-performance', label: 'Performance', icon: TrendingUp },
   { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
