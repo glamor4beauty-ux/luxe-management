@@ -290,7 +290,7 @@ export default function PerformerDashboard() {
       {/* Quick Access */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-3">Quick Access</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="space-y-3">
           <Link to="/performer-schedule">
             <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors cursor-pointer">
               <Calendar className="h-7 w-7 text-primary mb-3" />
