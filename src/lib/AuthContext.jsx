@@ -102,16 +102,7 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
-      // Merge stageName if available from localStorage
-      const stored = localStorage.getItem('auth_user');
-      if (stored) {
-        try {
-          const storedUser = JSON.parse(stored);
-          if (storedUser.stageName) {
-            currentUser.stageName = storedUser.stageName;
-          }
-        } catch {}
-      }
+      // If stageName not on user object, it will be synced from Performer on next login
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
