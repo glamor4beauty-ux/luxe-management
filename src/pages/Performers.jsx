@@ -149,9 +149,9 @@ export default function Performers() {
             <table className="w-full text-sm">
               <thead>
                <tr className="border-b border-border bg-secondary/50">
-                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Performer</th>
-                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Email</th>
-                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Phone</th>
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stage Name</th>
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone</th>
                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                </tr>
@@ -164,24 +164,12 @@ export default function Performers() {
                     className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
                   >
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        {p.profilePhoto ? (
-                          <img src={p.profilePhoto} alt="" className="h-5 w-5 rounded object-cover flex-shrink-0" />
-                        ) : (
-                          <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
-                            {(p.firstName?.[0] || '').toUpperCase()}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground text-sm truncate">{p.firstName} {p.lastName}</p>
-                          <p className="text-xs text-primary">{p.stageName || '—'}</p>
-                        </div>
-                      </div>
+                      <p className="font-medium text-foreground text-sm">{p.stageName || '—'}</p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       <a href={`mailto:${p.email}`} className="hover:text-primary transition-colors" onClick={e => e.stopPropagation()}>{p.email || '—'}</a>
                     </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                    <td className="px-4 py-3 text-sm text-muted-foreground">
                       <a
                         href={contactMode === 'sms' ? `sms:${p.phone}` : `tel:${p.phone}`}
                         className="hover:text-primary transition-colors"
