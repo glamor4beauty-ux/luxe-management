@@ -17,7 +17,7 @@ export default function Users() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'performer', manualEntry: false, password: '' });
-  const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', role: 'performer' });
+  const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', role: 'performer', stageName: '' });
   const [editingData, setEditingData] = useState({});
   const [manualDialogOpen, setManualDialogOpen] = useState(false);
   const [showAddPassword, setShowAddPassword] = useState(false);
@@ -116,26 +116,26 @@ export default function Users() {
       return;
     }
     try {
-      const newUser = await base44.asServiceRole.entities.User.create({
-        full_name: addForm.full_name,
-        email: addForm.email,
-        password: addForm.password,
-        role: addForm.role
-      });
-      await base44.asServiceRole.entities.UserCredentials.create({
-        userId: newUser.id,
+      // Check for duplicate
+      const existing = await base44.entities.UserCredentials.filter({ email: addForm.email });
+      if (existing.length > 0) {
+        toast.error('A user with this email already exists');
+        return;
+      }
+      await base44.entities.UserCredentials.create({
         email: addForm.email,
         password: addForm.password,
         role: addForm.role,
         full_name: addForm.full_name,
-        stageName: '',
+        stageName: addForm.stageName || '',
+        userId: '',
       });
       toast.success('User added');
       setAddDialogOpen(false);
-      setAddForm({ full_name: '', email: '', password: '', role: 'performer' });
+      setAddForm({ full_name: '', email: '', password: '', role: 'performer', stageName: '' });
       loadUsers();
     } catch (e) {
-      toast.error('Failed to add user');
+      toast.error('Failed to add user: ' + (e.message || ''));
     }
   };
 
@@ -217,6 +217,15 @@ export default function Users() {
                 value={addForm.email} 
                 onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} 
                 placeholder="user@example.com" 
+                className="bg-secondary border-border text-foreground h-9 mt-1" 
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Stage Name</Label>
+              <Input 
+                value={addForm.stageName} 
+                onChange={e => setAddForm(f => ({ ...f, stageName: e.target.value }))} 
+                placeholder="e.g. StageName123" 
                 className="bg-secondary border-border text-foreground h-9 mt-1" 
               />
             </div>
