@@ -14,7 +14,7 @@ export default function AdminKnowledgeBase() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
-  const fileInputRef = React.useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     loadEntries();
