@@ -1,165 +1,213 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Search, Upload, Loader2, BookOpen, FileText, Trash2 } from 'lucide-react';
-import { Input } from "@/components/ui/input";
+import { Upload, Send, Loader2, FileText, X, MessageSquare } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+const GREETING = {
+  name: "Megan",
+  greeting: "Welcome to LUXE Talent Systems! My name is Megan. I can help with performer-related questions.",
+  suggestions: [
+    "How do I schedule my first shift?",
+    "What documents do I need to upload?",
+    "How are earnings calculated?",
+    "What is the onboarding process?"
+  ]
+};
+
 export default function KnowledgeBase() {
-  const [files, setFiles] = useState([]);
+  const [messages, setMessages] = useState([
+    { type: 'assistant', content: GREETING.greeting, timestamp: new Date() }
+  ]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [searchResults, setSearchResults] = useState(null);
+  const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    loadFiles();
-  }, []);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const loadFiles = async () => {
-    // In a real app, you'd fetch from a KnowledgeBase entity
-    // For now, we'll just initialize empty
-    setFiles([]);
-  };
+  const handleFileUpload = async (files) => {
+    if (!files.length) return;
+    
+    setUploading(true);
+    const newFiles = [];
+    
+    for (const file of files) {
+      try {
+        if (!['text/plain', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+          toast.error(`${file.name} is not supported. Use .txt, .pdf, or .docx`);
+          continue;
+        }
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validTypes = ['application/pdf', 'application/msword', 'text/csv', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!validTypes.includes(file.type)) {
-      toast.error('Please upload CSV, Word, or PDF files only');
-      return;
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        newFiles.push({ name: file.name, url: file_url, type: file.type });
+      } catch (e) {
+        toast.error(`Failed to upload ${file.name}`);
+      }
     }
 
-    setUploading(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFiles(prev => [...prev, { id: Date.now(), name: file.name, url: file_url, type: file.type }]);
-      toast.success(`${file.name} uploaded!`);
-    } catch (e) {
-      toast.error('Upload failed');
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+    if (newFiles.length > 0) {
+      toast.success(`${newFiles.length} file(s) uploaded successfully`);
     }
     setUploading(false);
   };
 
-  const handleSearch = async (searchTerm) => {
-    setQuery(searchTerm);
-
-    if (!searchTerm.trim()) {
-      setSearchResults(null);
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!query.trim() || uploadedFiles.length === 0) {
+      if (uploadedFiles.length === 0) {
+        toast.error('Please upload documents first');
+      }
       return;
     }
 
+    const userMessage = query;
+    setQuery('');
+    setMessages(prev => [...prev, { type: 'user', content: userMessage, timestamp: new Date() }]);
     setLoading(true);
+
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a helpful assistant for performers. A performer is searching for: "${searchTerm}"\n\nYou have access to these documents: ${files.map(f => f.name).join(', ')}\n\nProvide a helpful response based on common knowledge about performer schedules, earnings, uploads, and support. Be concise and actionable.`,
-        add_context_from_internet: false,
+        prompt: `You are Megan, a helpful assistant for LUXE Talent Systems. A performer is asking: "${userMessage}"\n\nUse the uploaded documents to find relevant information and provide a clear, helpful answer. If the information is not in the documents, say so and provide general guidance.`,
+        file_urls: uploadedFiles.map(f => f.url),
+        model: 'automatic'
       });
 
-      setSearchResults({
-        query: searchTerm,
-        answer: response.data,
-        timestamp: new Date(),
-      });
+      setMessages(prev => [...prev, { type: 'assistant', content: response, timestamp: new Date() }]);
     } catch (e) {
-      toast.error('Search failed');
+      toast.error('Failed to process query');
+      setMessages(prev => prev.slice(0, -1));
     }
     setLoading(false);
   };
 
-  const handleDeleteFile = (id) => {
-    setFiles(prev => prev.filter(f => f.id !== id));
-    toast.success('File removed');
+  const removeFile = (idx) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleFileUpload(e.dataTransfer.files);
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold text-foreground mb-1">Knowledge Base</h2>
-        <p className="text-xs text-muted-foreground">Find answers and resources</p>
-      </div>
-
-      {/* Search */}
-      <div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search documents..."
-            value={query}
-            onChange={e => handleSearch(e.target.value)}
-            className="pl-10 bg-card border-border text-foreground h-10"
-          />
-          {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary animate-spin" />}
-        </div>
-      </div>
-
-      {/* Upload Files */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Upload className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold text-foreground">Upload Documents</h3>
-        </div>
-        <p className="text-xs text-muted-foreground mb-3">CSV, Word, PDF</p>
-        <label className="flex items-center justify-center border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary/50 transition-colors">
-          <div className="text-center">
-            <FileText className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-xs font-medium text-muted-foreground">Click to upload</p>
+    <div className="flex flex-col h-[calc(100vh-120px)] bg-background">
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-xs lg:max-w-md xl:max-w-lg rounded-lg p-3 ${
+              msg.type === 'user' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'bg-card border border-border text-foreground'
+            }`}>
+              <p className="text-sm leading-relaxed">{msg.content}</p>
+            </div>
           </div>
-          <input
-            type="file"
-            accept=".csv,.doc,.docx,.pdf"
-            onChange={handleFileUpload}
-            disabled={uploading}
-            className="hidden"
-          />
-        </label>
+        ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-card border border-border rounded-lg p-3 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Megan is thinking...</span>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Uploaded Files */}
-      {files.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Documents ({files.length})</h3>
-          <div className="space-y-2">
-            {files.map(file => (
-              <div key={file.id} className="flex items-center justify-between bg-secondary/50 p-3 rounded-lg">
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="h-4 w-4 text-primary shrink-0" />
-                  <p className="text-sm text-foreground truncate">{file.name}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDeleteFile(file.id)}
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+      {uploadedFiles.length > 0 && (
+        <div className="border-t border-border px-4 py-3 bg-card">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Uploaded Documents ({uploadedFiles.length})</p>
+          <div className="flex flex-wrap gap-2">
+            {uploadedFiles.map((file, idx) => (
+              <div key={idx} className="flex items-center gap-1 bg-secondary rounded-lg px-2.5 py-1.5">
+                <FileText className="h-3 w-3 text-primary" />
+                <span className="text-xs text-foreground truncate max-w-[150px]">{file.name}</span>
+                <button onClick={() => removeFile(idx)} className="ml-1 text-muted-foreground hover:text-foreground">
+                  <X className="h-3 w-3" />
+                </button>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Search Results */}
-      {searchResults && (
-        <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-foreground mb-2">Results for "{searchResults.query}"</h3>
-          <div className="bg-secondary/30 rounded-lg p-3 text-sm text-foreground leading-relaxed">
-            {searchResults.answer}
+      {/* Upload Area / Suggestions */}
+      {uploadedFiles.length === 0 && (
+        <div className="border-t border-border px-4 py-4 bg-card space-y-3">
+          <div 
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-xs font-medium text-foreground">Drop files or click to upload</p>
+            <p className="text-xs text-muted-foreground mt-1">.txt, .pdf, .docx</p>
+          </div>
+          <p className="text-xs text-muted-foreground">Start by uploading documents, then ask questions.</p>
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Sample questions:</p>
+            {GREETING.suggestions.map((s, i) => (
+              <button key={i} onClick={() => { setQuery(s); }} className="block text-xs text-primary hover:underline text-left w-full">
+                • {s}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {!searchResults && !query && files.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-50" />
-          <p className="text-sm">No documents yet</p>
-          <p className="text-xs mt-1">Upload files to get started</p>
-        </div>
-      )}
+      {/* Input Area */}
+      <div className="border-t border-border px-4 py-3 bg-card">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".txt,.pdf,.docx"
+            onChange={(e) => handleFileUpload(e.target.files)}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="border-border"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          </Button>
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Ask a question..."
+            disabled={loading || uploadedFiles.length === 0}
+            className="bg-secondary border-border text-foreground flex-1 h-9 text-sm"
+          />
+          <Button
+            type="submit"
+            disabled={loading || !query.trim() || uploadedFiles.length === 0}
+            className="bg-primary text-primary-foreground h-9 px-4"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
