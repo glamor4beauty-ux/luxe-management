@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Plus, Search, Eye, Pencil, Trash2, Phone, MessageSquare, Mail, GraduationCap, ShieldCheck, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function Performers() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [performers, setPerformers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -147,56 +148,52 @@ export default function Performers() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Stage Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Email</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Phone</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Status</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
-                </tr>
+               <tr className="border-b border-border bg-secondary/50">
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Performer</th>
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Email</th>
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Phone</th>
+                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                 <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+               </tr>
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                  <tr
+                    key={p.id}
+                    onClick={() => navigate(`/performers/${p.id}`)}
+                    className="border-b border-border/50 hover:bg-secondary/30 transition-colors cursor-pointer"
+                  >
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         {p.profilePhoto ? (
-                          <img src={p.profilePhoto} alt="" className="h-8 w-8 rounded-full object-cover" />
+                          <img src={p.profilePhoto} alt="" className="h-5 w-5 rounded object-cover flex-shrink-0" />
                         ) : (
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
-                            {(p.firstName?.[0] || '') + (p.lastName?.[0] || '')}
+                          <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
+                            {(p.firstName?.[0] || '').toUpperCase()}
                           </div>
                         )}
-                        <span className="font-medium text-foreground">{p.firstName} {p.lastName}</span>
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground text-sm truncate">{p.firstName} {p.lastName}</p>
+                          <p className="text-xs text-primary">{p.stageName || '—'}</p>
+                        </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
+                      <a href={`mailto:${p.email}`} className="hover:text-primary transition-colors" onClick={e => e.stopPropagation()}>{p.email || '—'}</a>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">
+                      <a
+                        href={contactMode === 'sms' ? `sms:${p.phone}` : `tel:${p.phone}`}
+                        className="hover:text-primary transition-colors"
+                        onClick={e => e.stopPropagation()}
+                      >{p.phone || '—'}</a>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="space-y-2">
-                        <p className="text-foreground font-medium">{p.stageName || 'Not set'}</p>
-                        <PerformerProfileInfo stageName={p.stageName} />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
-                      {p.email ? (
-                        <a href={`mailto:${p.email}`} className="hover:text-primary transition-colors" onClick={e => e.stopPropagation()}>{p.email}</a>
-                      ) : '-'}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">
-                      {p.phone ? (
-                        <a
-                          href={contactMode === 'sms' ? `sms:${p.phone}` : `tel:${p.phone}`}
-                          className="hover:text-primary transition-colors"
-                          onClick={e => e.stopPropagation()}
-                        >{p.phone}</a>
-                      ) : '-'}
-                    </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
                       {p.approved === false ? (
                         <button
-                          onClick={() => handleApprove(p.id)}
+                          onClick={e => { e.stopPropagation(); handleApprove(p.id); }}
                           className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 hover:bg-green-500/10 hover:text-green-400 transition-colors font-medium"
-                        >Pending — Approve</button>
+                        >Pending</button>
                       ) : (
                         <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 font-medium">Approved</span>
                       )}
