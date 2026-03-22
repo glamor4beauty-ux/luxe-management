@@ -40,7 +40,7 @@ export default function Users() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const res = await base44.functions.invoke('manageUserCredential', { action: 'list' });
+      const res = await callFn({ action: 'list' });
       const creds = res.data.creds || [];
       const mapped = creds.map(c => ({
         id: c.userId || c.id,
@@ -99,11 +99,7 @@ export default function Users() {
         full_name: data.full_name || user.full_name,
         userId: user.id,
       };
-      const res = await base44.functions.invoke('manageUserCredential', {
-        action: 'update',
-        credId: user._credId,
-        data: credData,
-      });
+      const res = await callFn({ action: 'update', credId: user._credId, data: credData });
       if (!res.data.success) throw new Error(res.data.error);
       toast.success('User updated');
       setEditingData(prev => ({ ...prev, [userId]: undefined }));
@@ -126,7 +122,7 @@ export default function Users() {
       return;
     }
     try {
-      const res = await base44.functions.invoke('manageUserCredential', {
+      const res = await callFn({
         action: 'create',
         data: {
           email: addForm.email,
@@ -137,8 +133,8 @@ export default function Users() {
           userId: '',
         }
       });
-      if (!res.data.success) {
-        toast.error(res.data.error || 'Failed to add user');
+      if (!res.success) {
+        toast.error(res.error || 'Failed to add user');
         return;
       }
       toast.success('User added');
