@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
       username: user_data.username,
       profileUrl: user_data.profile_url || '',
       followers: user_data.followers || 0,
+      earnings: user_data.earnings || 0,
       status: user_data.status || 'pending'
     });
   } catch (error) {
