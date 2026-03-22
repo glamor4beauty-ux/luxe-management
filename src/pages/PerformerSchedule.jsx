@@ -22,8 +22,10 @@ export default function PerformerSchedule() {
     async function load() {
       const u = await base44.auth.me();
       setUser(u);
-      const cal = await base44.entities.Calendar.filter({ stageName: u.full_name });
-      setEvents(cal);
+      if (u.stageName) {
+        const cal = await base44.entities.Calendar.filter({ stageName: u.stageName });
+        setEvents(cal);
+      }
       setLoading(false);
     }
     load();
@@ -57,7 +59,7 @@ export default function PerformerSchedule() {
     }
 
     await base44.entities.Calendar.create({
-      stageName: user.full_name,
+      stageName: user.stageName,
       startTime: start.toISOString(),
       endTime: end.toISOString(),
       totalHours: hours,
@@ -66,7 +68,7 @@ export default function PerformerSchedule() {
     setSaving(false);
     setDialogOpen(false);
     setForm({ startTime: '', endTime: '' });
-    const cal = await base44.entities.Calendar.filter({ stageName: user.full_name });
+    const cal = await base44.entities.Calendar.filter({ stageName: user.stageName });
     setEvents(cal);
   };
 
