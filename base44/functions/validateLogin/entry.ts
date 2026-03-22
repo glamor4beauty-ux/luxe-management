@@ -39,6 +39,15 @@ Deno.serve(async (req) => {
       if (performers.length > 0) stageName = performers[0].stageName || null;
     }
 
+    // Persist stageName to User entity if performer
+    if (cred.role === 'performer' && stageName) {
+      try {
+        await base44.asServiceRole.entities.User.update(cred.userId || cred.id, { stageName });
+      } catch (e) {
+        // Silently fail if update doesn't work
+      }
+    }
+
     return Response.json({
       success: true,
       user: {
