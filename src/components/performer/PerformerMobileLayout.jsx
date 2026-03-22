@@ -3,11 +3,7 @@ import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle, Trendin
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const topNavItems = [
-  { path: '/performer-instructions', label: 'Guide', icon: HelpCircle },
-  { path: '/performer-stripchat-view', label: 'Stripchat', icon: Monitor },
-  { path: '/performer-performance', label: 'Performance', icon: TrendingUp },
-];
+const topNavItems = [];
 
 const bottomNavItems = [
   { path: '/performer-dashboard', label: 'Home', icon: Home },
@@ -54,25 +50,7 @@ export default function PerformerMobileLayout() {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        {/* Top row */}
-        <div className="flex justify-around border-b border-border/50">
-          {topNavItems.map(item => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex flex-col items-center justify-center w-full py-2 text-xs transition-colors ${
-                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon className="h-5 w-5 mb-1" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
+  
         {/* Bottom row */}
         <div className="flex justify-around">
           {bottomNavItems.map(item => {
