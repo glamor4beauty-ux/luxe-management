@@ -30,10 +30,20 @@ export default function Users() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const res = await base44.functions.invoke('getUsers', {});
-      setUsers(res.data?.users || []);
+      const creds = await base44.entities.UserCredentials.list('-created_date', 200);
+      // Map UserCredentials fields to match User shape
+      const mapped = creds.map(c => ({
+        id: c.userId || c.id,
+        _credId: c.id,
+        full_name: c.full_name || '',
+        email: c.email || '',
+        password: c.password || '',
+        role: c.role || 'performer',
+        stageName: c.stageName || '',
+      }));
+      setUsers(mapped);
     } catch (e) {
-      toast.error('Failed to load users');
+      toast.error('Failed to load users: ' + (e.message || ''));
     }
     setLoading(false);
   };
