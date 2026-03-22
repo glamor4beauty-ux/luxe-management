@@ -3,15 +3,18 @@ import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle, Trendin
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const navItems = [
+const topNavItems = [
+  { path: '/performer-instructions', label: 'Guide', icon: HelpCircle },
+  { path: '/performer-stripchat-view', label: 'Stripchat', icon: Monitor },
+  { path: '/performer-performance', label: 'Performance', icon: TrendingUp },
+];
+
+const bottomNavItems = [
   { path: '/performer-dashboard', label: 'Home', icon: Home },
   { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
-  { path: '/performer-performance', label: 'Performance', icon: TrendingUp },
   { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
-  { path: '/performer-stripchat-view', label: 'Stripchat', icon: Monitor },
   { path: '/performer-upload', label: 'Upload', icon: Upload },
   { path: '/performer-support', label: 'Support', icon: MessageSquare },
-  { path: '/performer-instructions', label: 'Guide', icon: HelpCircle },
 ];
 
 export default function PerformerMobileLayout() {
@@ -51,22 +54,38 @@ export default function PerformerMobileLayout() {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="flex justify-around">
-          {navItems.map(item => {
+        {/* Top row */}
+        <div className="flex justify-around border-b border-border/50">
+          {topNavItems.map(item => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center justify-center w-full py-3 text-xs transition-colors ${
-                  isActive
-                    ? 'text-primary border-t-2 border-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                className={`flex items-center justify-center w-full py-2 transition-colors ${
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Icon className="h-5 w-5 mb-1" />
-                <span>{item.label}</span>
+                <Icon className="h-5 w-5" />
+              </Link>
+            );
+          })}
+        </div>
+        {/* Bottom row */}
+        <div className="flex justify-around">
+          {bottomNavItems.map(item => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center justify-center w-full py-2 transition-colors ${
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
               </Link>
             );
           })}
