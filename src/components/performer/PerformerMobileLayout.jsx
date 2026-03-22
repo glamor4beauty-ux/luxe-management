@@ -1,5 +1,5 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import { Calendar, BookOpen, Monitor, Upload, MessageSquare } from 'lucide-react';
+import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { path: '/performer-stripchat-view', label: 'Stripchat', icon: Monitor },
   { path: '/performer-upload', label: 'Upload', icon: Upload },
   { path: '/performer-support', label: 'Support', icon: MessageSquare },
+  { path: '/performer-instructions', label: 'Guide', icon: HelpCircle },
 ];
 
 export default function PerformerMobileLayout() {
