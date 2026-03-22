@@ -28,6 +28,7 @@ import KnowledgeBase from './pages/KnowledgeBase';
 import PerformerProfile from './pages/PerformerProfile';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import Users from './pages/Users';
+import Instructions from './pages/Instructions';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -82,8 +83,10 @@ const AuthenticatedApp = () => {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/recruiter" element={<RecruiterDashboard />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/instructions" element={<Instructions />} />
       </Route>
       <Route element={<PerformerMobileLayout />}>
+        <Route path="/performer-instructions" element={<Instructions />} />
         <Route path="/performer-schedule" element={<PerformerShifts />} />
         <Route path="/performer-knowledge" element={<KnowledgeBase />} />
         <Route path="/performer-stripchat-view" element={<PerformerStripchatView />} />
