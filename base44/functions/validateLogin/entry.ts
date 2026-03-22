@@ -32,18 +32,17 @@ Deno.serve(async (req) => {
       }
     }
 
-    // If stageName not in credentials, look it up from Performer entity
-    let stageName = cred.stageName || null;
-    if (!stageName && cred.role === 'performer') {
+    // For performers, query Performer record by email to get stageName
+    let stageName = null;
+    if (cred.role === 'performer') {
       const performers = await base44.asServiceRole.entities.Performer.filter({ email: cred.email });
-      if (performers.length > 0) {
-        stageName = performers[0].stageName || null;
-      } else {
+      if (performers.length === 0) {
         return Response.json({
           success: false,
-          error: 'Performer record not found for this email. Contact support.'
+          error: 'Performer record not found for this email.'
         }, { status: 404 });
       }
+      stageName = performers[0].stageName;
     }
 
     return Response.json({
