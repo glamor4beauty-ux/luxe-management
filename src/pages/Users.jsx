@@ -29,8 +29,12 @@ export default function Users() {
 
   const loadUsers = async () => {
     setLoading(true);
-    const data = await base44.entities.User.list();
-    setUsers(data);
+    try {
+      const res = await base44.functions.invoke('getUsers', {});
+      setUsers(res.data?.users || []);
+    } catch (e) {
+      toast.error('Failed to load users');
+    }
     setLoading(false);
   };
 
