@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
 import { Mail, Loader2, Save, UserPlus, Eye, EyeOff } from 'lucide-react';
 import ManualPerformerDialog from '../components/ManualPerformerDialog';
 import { Button } from "@/components/ui/button";
