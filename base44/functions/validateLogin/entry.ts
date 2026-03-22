@@ -9,20 +9,20 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Email and password required' }, { status: 400 });
     }
 
-    const users = await base44.asServiceRole.entities.User.filter({ email });
+    const creds = await base44.asServiceRole.entities.UserCredentials.filter({ email });
 
-    if (users.length === 0) {
+    if (creds.length === 0) {
       return Response.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const user = users[0];
+    const cred = creds[0];
 
-    if (user.password !== password) {
+    if (cred.password !== password) {
       return Response.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
 
     // If performer, check approval status
-    if (user.role === 'performer') {
+    if (cred.role === 'performer') {
       const performers = await base44.asServiceRole.entities.Performer.filter({ email });
       if (performers.length > 0 && performers[0].approved === false) {
         return Response.json({
@@ -35,11 +35,11 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.full_name,
-        role: user.role,
-        stageName: user.stageName || null
+        id: cred.userId || cred.id,
+        email: cred.email,
+        full_name: cred.full_name,
+        role: cred.role,
+        stageName: cred.stageName || null
       }
     });
   } catch (error) {
