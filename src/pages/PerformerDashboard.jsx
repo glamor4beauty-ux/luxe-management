@@ -147,13 +147,13 @@ export default function PerformerDashboard() {
       </div>
 
       {/* Hero: Profile + Shifts/Hours/Onboarding */}
-      <div className="grid grid-cols-[140px_1fr] gap-6">
+      <div className="grid grid-cols-[180px_1fr] gap-6 items-end">
         {/* Left: Profile Image */}
         <div>
           {performer?.profilePhoto ? (
-            <img src={performer.profilePhoto} alt="Profile" className="h-32 w-32 rounded-xl object-cover border border-border" />
+            <img src={performer.profilePhoto} alt="Profile" className="h-48 w-48 rounded-xl object-cover border border-border" />
           ) : (
-            <div className="h-32 w-32 rounded-xl bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
+            <div className="h-48 w-48 rounded-xl bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
           )}
         </div>
         {/* Right: Shifts, Hours, Onboarding */}
