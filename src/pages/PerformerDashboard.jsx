@@ -1,10 +1,42 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Calendar, BookOpen, Zap, MessageSquare, Upload, Clock, GraduationCap, ExternalLink } from 'lucide-react';
+import { Calendar, BookOpen, Zap, MessageSquare, Upload, Clock, GraduationCap, ExternalLink, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { TrendingUp } from 'lucide-react';
+
+function Accordion({ performer, title, fields }) {
+  const [open, setOpen] = useState(false);
+  const hasValues = fields.some(f => performer[f]);
+
+  if (!hasValues) return null;
+
+  return (
+    <div className="bg-card border border-border rounded-lg">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 transition-colors"
+      >
+        <span>{title}</span>
+        {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+      {open && (
+        <div className="border-t border-border px-4 py-3 grid grid-cols-2 gap-3 text-xs bg-secondary/20">
+          {fields.map(f => (
+            performer[f] && (
+              <div key={f}>
+                <p className="text-muted-foreground mb-0.5">{f.replace(/([A-Z])/g, ' $1').toLowerCase()}</p>
+                <p className="text-foreground font-medium">{performer[f]}</p>
+              </div>
+            )
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function PerformerDashboard() {
   const { user } = useAuth();
@@ -85,10 +117,101 @@ export default function PerformerDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-1">Welcome back, {user?.full_name}!</h1>
-        <p className="text-muted-foreground">Stage name: <span className="text-primary font-medium">{performer?.stageName || 'Not set'}</span></p>
+      {/* Top Nav Row */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-1">Welcome back, {user?.full_name}!</h1>
+          <p className="text-muted-foreground">Stage name: <span className="text-primary font-medium">{performer?.stageName || 'Not set'}</span></p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link to="/performer-instructions" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium transition-colors">
+            <BookOpen className="h-4 w-4" /> Guide
+          </Link>
+          <Link to="/performer-stripchat-view" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium transition-colors">
+            <Zap className="h-4 w-4" /> Stripchat
+          </Link>
+          <Link to="/performer-performance" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium transition-colors">
+            <TrendingUp className="h-4 w-4" /> Performance
+          </Link>
+        </div>
       </div>
+
+      {/* Hero: Profile + Shifts/Hours/Onboarding */}
+      <div className="grid grid-cols-[140px_1fr] gap-6">
+        {/* Left: Profile Image */}
+        <div>
+          {performer?.profilePhoto ? (
+            <img src={performer.profilePhoto} alt="Profile" className="h-32 w-32 rounded-xl object-cover border border-border" />
+          ) : (
+            <div className="h-32 w-32 rounded-xl bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
+          )}
+        </div>
+        {/* Right: Shifts, Hours, Onboarding */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+            <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Calendar className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="text-xs">
+              <p className="text-muted-foreground">Upcoming Shifts</p>
+              <p className="font-bold text-foreground">{upcomingShifts.length}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+            <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Clock className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="text-xs">
+              <p className="text-muted-foreground">Weekly Hours</p>
+              <p className="font-bold text-foreground">{weeklyHours}h</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+            <div className="h-6 w-6 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <GraduationCap className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="text-xs">
+              {classroomAssignment ? (
+                <a href={classroomAssignment.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Open Onboarding</a>
+              ) : (
+                <p className="text-muted-foreground">No assignment</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Row: Recruiter, Email, Phone, DOB, Applying For */}
+      {performer && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 bg-card border border-border rounded-lg p-4">
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Recruiter</p>
+            <p className="text-sm font-medium text-foreground">{performer.recruiterName || '—'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Email</p>
+            <a href={`mailto:${performer.email}`} className="text-sm font-medium text-primary hover:underline">{performer.email}</a>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Phone</p>
+            <a href={`tel:${performer.phone}`} className="text-sm font-medium text-primary hover:underline">{performer.phone || '—'}</a>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Date of Birth</p>
+            <p className="text-sm font-medium text-foreground">{performer.dateOfBirth ? new Date(performer.dateOfBirth).toLocaleDateString() : '—'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Display Age</p>
+            <p className="text-sm font-medium text-foreground">{performer.displayAge || '—'}</p>
+          </div>
+          {performer.applyingFor && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">Applying For</p>
+              <p className="text-sm font-medium text-foreground">{performer.applyingFor}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stats Row - Compact */}
       <div className="flex gap-3 items-center">
@@ -187,7 +310,7 @@ export default function PerformerDashboard() {
       {/* Quick Access */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-3">Quick Access</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Link to="/performer-schedule">
             <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors cursor-pointer">
               <Calendar className="h-7 w-7 text-primary mb-3" />
@@ -219,26 +342,40 @@ export default function PerformerDashboard() {
         </div>
       </div>
 
-      {/* Profile Photos */}
+      {/* Accordions: Performer Fields */}
       {performer && (
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="text-base font-semibold text-foreground mb-4">Profile Photos</h2>
-          <div className="space-y-3">
-            {[{ key: 'profilePhoto', label: 'Profile Photo' }, { key: 'idFront', label: 'ID Front' }, { key: 'idBack', label: 'ID Back' }, { key: 'faceId', label: 'Face + ID' }].map(photo => (
-              <div key={photo.key} className="flex items-center justify-between gap-3 bg-secondary/50 rounded-lg p-3">
-                <p className="text-sm font-medium text-foreground">{photo.label}</p>
-                <div className="flex items-center gap-2">
-                  {performer[photo.key] ? (
-                    <img src={performer[photo.key]} alt={photo.label} className="h-12 w-12 rounded object-cover border border-border" />
-                  ) : (
-                    <div className="h-12 w-12 rounded bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">None</div>
-                  )}
-                  <Button size="sm" variant="outline" onClick={() => handleUploadPhoto(photo.key)} disabled={uploading} className="border-border h-8 text-xs">
-                    <Upload className="h-3 w-3 mr-1" /> Upload
-                  </Button>
+        <div className="space-y-3">
+          {/* Physical Attributes */}
+          <Accordion performer={performer} title="Physical Attributes" fields={['height', 'weight', 'build', 'ethnicity', 'eyeColor', 'hairColor', 'hairLength', 'breastSize', 'buttSize', 'dressSize']} />
+          {/* Preferences */}
+          <Accordion performer={performer} title="Preferences & Interests" fields={['orientation', 'sexualPreferences', 'interestedIn', 'turnsOn', 'turnsOff']} />
+          {/* About & Bio */}
+          <Accordion performer={performer} title="About Me" fields={['aboutMe']} />
+          {/* Languages */}
+          <Accordion performer={performer} title="Languages" fields={['primaryLanguage', 'otherLanguage']} />
+          {/* Additional */}
+          <Accordion performer={performer} title="Additional Info" fields={['alternateUsernames', 'commissionRate', 'memo']} />
+
+          {/* Profile Photos */}
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h2 className="text-base font-semibold text-foreground mb-4">Profile Photos</h2>
+            <div className="space-y-3">
+              {[{ key: 'profilePhoto', label: 'Profile Photo' }, { key: 'idFront', label: 'ID Front' }, { key: 'idBack', label: 'ID Back' }, { key: 'faceId', label: 'Face + ID' }].map(photo => (
+                <div key={photo.key} className="flex items-center justify-between gap-3 bg-secondary/50 rounded-lg p-3">
+                  <p className="text-sm font-medium text-foreground">{photo.label}</p>
+                  <div className="flex items-center gap-2">
+                    {performer[photo.key] ? (
+                      <img src={performer[photo.key]} alt={photo.label} className="h-12 w-12 rounded object-cover border border-border" />
+                    ) : (
+                      <div className="h-12 w-12 rounded bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">None</div>
+                    )}
+                    <Button size="sm" variant="outline" onClick={() => handleUploadPhoto(photo.key)} disabled={uploading} className="border-border h-8 text-xs">
+                      <Upload className="h-3 w-3 mr-1" /> Upload
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
