@@ -29,6 +29,7 @@ import PerformerProfile from './pages/PerformerProfile';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import Users from './pages/Users';
 import Instructions from './pages/Instructions';
+import ShiftsDashboard from './pages/ShiftsDashboard';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
         <Route path="/recruiter" element={<RecruiterDashboard />} />
         <Route path="/users" element={<Users />} />
         <Route path="/instructions" element={<Instructions />} />
+        <Route path="/shifts-dashboard" element={<ShiftsDashboard />} />
       </Route>
       <Route element={<PerformerMobileLayout />}>
         <Route path="/performer-instructions" element={<Instructions />} />
