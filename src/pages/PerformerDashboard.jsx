@@ -49,11 +49,15 @@ export default function PerformerDashboard() {
 
   useEffect(() => {
     async function load() {
-      const performers = await base44.entities.Performer.filter({ stageName: user?.stageName || user?.full_name });
+      if (!user?.stageName) {
+        setLoading(false);
+        return; // Cannot load without stage name
+      }
+      const performers = await base44.entities.Performer.filter({ stageName: user.stageName });
       const p = performers[0] || null;
       if (p) setPerformer(p);
 
-      const cal = await base44.entities.Calendar.filter({ stageName: user?.stageName || user?.full_name });
+      const cal = await base44.entities.Calendar.filter({ stageName: user.stageName });
       const now = new Date();
 
       const upcoming = cal
@@ -115,14 +119,22 @@ export default function PerformerDashboard() {
     return <div className="flex items-center justify-center h-40"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
   }
 
+  if (!user?.stageName) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground mb-4">Stage name is not set. Cannot display performer record.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Top Nav Row */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-1">Welcome back, {user?.full_name}!</h1>
-          <p className="text-muted-foreground">Stage name: <span className="text-primary font-medium">{performer?.stageName || 'Not set'}</span></p>
+      <div>
+        <h1 className="text-3xl font-bold text-foreground mb-3">Welcome back, {user?.full_name}!</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <p className="text-muted-foreground">Stage name: <span className="text-primary font-medium">{performer?.stageName || user?.stageName}</span></p>
         </div>
+        {/* Nav Buttons Under Name */}
         <div className="flex items-center gap-2">
           <Link to="/performer-instructions" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium transition-colors">
             <BookOpen className="h-4 w-4" /> Guide
@@ -310,7 +322,7 @@ export default function PerformerDashboard() {
       {/* Quick Access */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-3">Quick Access</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <Link to="/performer-schedule">
             <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors cursor-pointer">
               <Calendar className="h-7 w-7 text-primary mb-3" />
@@ -323,13 +335,6 @@ export default function PerformerDashboard() {
               <MessageSquare className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-foreground text-sm mb-0.5">Support</h3>
               <p className="text-xs text-muted-foreground">Get help</p>
-            </div>
-          </Link>
-          <Link to="/performer-knowledge">
-            <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors cursor-pointer">
-              <BookOpen className="h-7 w-7 text-primary mb-3" />
-              <h3 className="font-semibold text-foreground text-sm mb-0.5">Knowledge Base</h3>
-              <p className="text-xs text-muted-foreground">Learn more</p>
             </div>
           </Link>
           <Link to="/performer-upload">
