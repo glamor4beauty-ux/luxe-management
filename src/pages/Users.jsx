@@ -11,12 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 
 const callFn = async (payload) => {
-  const res = await fetch(`/api/apps/${appParams.appId}/functions/prod/manageUserCredential`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  return res.json();
+  const res = await base44.functions.invoke('manageUserCredential', payload);
+  return res.data;
 };
 
 export default function Users() {
