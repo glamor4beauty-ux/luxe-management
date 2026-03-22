@@ -55,7 +55,7 @@ export default function PerformerDashboard() {
       }
       const performers = await base44.entities.Performer.filter({ stageName: user.stageName });
       const p = performers[0] || null;
-      if (p) setPerformer(p);
+      setPerformer(p);
 
       const cal = await base44.entities.Calendar.filter({ stageName: user.stageName });
       const now = new Date();
@@ -119,7 +119,11 @@ export default function PerformerDashboard() {
     return <div className="flex items-center justify-center h-40"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
   }
 
-  if (!user?.stageName) {
+  if (!user) {
+    return <div className="p-8 text-center"><p className="text-muted-foreground mb-4">Not authenticated.</p></div>;
+  }
+
+  if (!user.stageName) {
     return (
       <div className="p-8 text-center">
         <p className="text-muted-foreground mb-4">Stage name is not set. Cannot display performer record.</p>
