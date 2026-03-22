@@ -65,8 +65,17 @@ export default function Users() {
   const handleSaveUser = async (userId) => {
     const data = editingData[userId];
     if (!data) return;
+    const user = users.find(u => u.id === userId);
     try {
       await base44.asServiceRole.entities.User.update(userId, data);
+      // Sync to UserCredentials
+      const creds = await base44.entities.UserCredentials.filter({ email: user.email });
+      const credData = { email: data.email || user.email, password: data.password ?? user.password ?? '', role: data.role || user.role, stageName: data.stageName ?? user.stageName ?? '', full_name: data.full_name || user.full_name, userId };
+      if (creds.length > 0) {
+        await base44.asServiceRole.entities.UserCredentials.update(creds[0].id, credData);
+      } else {
+        await base44.asServiceRole.entities.UserCredentials.create(credData);
+      }
       toast.success('User updated');
       setEditingData(prev => ({ ...prev, [userId]: undefined }));
       loadUsers();
@@ -88,11 +97,19 @@ export default function Users() {
       return;
     }
     try {
-      await base44.asServiceRole.entities.User.create({
+      const newUser = await base44.asServiceRole.entities.User.create({
         full_name: addForm.full_name,
         email: addForm.email,
         password: addForm.password,
         role: addForm.role
+      });
+      await base44.asServiceRole.entities.UserCredentials.create({
+        userId: newUser.id,
+        email: addForm.email,
+        password: addForm.password,
+        role: addForm.role,
+        full_name: addForm.full_name,
+        stageName: '',
       });
       toast.success('User added');
       setAddDialogOpen(false);
