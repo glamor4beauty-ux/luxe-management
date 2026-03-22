@@ -121,41 +121,73 @@ export default function PerformerView() {
       </div>
 
       {/* Quick Profile Info */}
-      <div className="bg-card border border-border rounded-lg p-5 space-y-4">
-        <div className="grid grid-cols-[100px_1fr] gap-4 items-start">
+      <div className="bg-card border border-border rounded-lg p-5">
+        <div className="grid grid-cols-[140px_1fr] gap-4 items-start">
           {/* Photo */}
           <div>
             {performer.profilePhoto ? (
-              <img src={performer.profilePhoto} alt={performer.stageName} className="h-24 w-24 rounded-lg object-cover border border-border" />
+              <img src={performer.profilePhoto} alt={performer.stageName} className="h-32 w-32 rounded-lg object-cover border border-border" />
             ) : (
-              <div className="h-24 w-24 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
+              <div className="h-32 w-32 rounded-lg bg-secondary border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
             )}
           </div>
-          {/* Quick Info */}
-          <div className="space-y-2.5 text-sm">
+          {/* Details Grid */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
             <div>
               <p className="text-xs text-muted-foreground mb-0.5">Recruiter</p>
               <p className="font-medium text-foreground">{performer.recruiterName || '—'}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-muted-foreground">Phone:</p>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
               {performer.phone ? (
-                <a href={`tel:${performer.phone}`} className="font-medium text-primary hover:underline">{performer.phone}</a>
+                <a href={`tel:${performer.phone}`} className="font-medium text-primary hover:underline text-sm">{performer.phone}</a>
               ) : (
                 <span className="text-muted-foreground">—</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-muted-foreground">Age:</p>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Age</p>
               <p className="font-medium text-foreground">{performer.displayAge || '—'}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-muted-foreground">DOB:</p>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">DOB</p>
               {performer.dateOfBirth ? (
                 <p className="font-medium text-foreground">{new Date(performer.dateOfBirth).toLocaleDateString()}</p>
               ) : (
                 <span className="text-muted-foreground">—</span>
               )}
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Height</p>
+              <p className="font-medium text-foreground">{performer.height || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Weight</p>
+              <p className="font-medium text-foreground">{performer.weight || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Eyes</p>
+              <p className="font-medium text-foreground">{performer.eyeColor || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Hair</p>
+              <p className="font-medium text-foreground">{performer.hairColor || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Build</p>
+              <p className="font-medium text-foreground">{performer.build || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Hair Length</p>
+              <p className="font-medium text-foreground">{performer.hairLength || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Ethnicity</p>
+              <p className="font-medium text-foreground">{performer.ethnicity || '—'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Orientation</p>
+              <p className="font-medium text-foreground">{performer.orientation || '—'}</p>
             </div>
           </div>
         </div>
