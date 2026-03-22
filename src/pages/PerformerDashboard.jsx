@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TrendingUp } from 'lucide-react';
+import StripchatLookup from '@/components/stripchat/StripchatLookup';
 
 function Accordion({ performer, title, fields }) {
   const [open, setOpen] = useState(false);
@@ -284,6 +285,17 @@ export default function PerformerDashboard() {
               </button>
             </a>
           </div>
+        </div>
+      )}
+
+      {/* Stripchat Lookup */}
+      {performer && (
+        <div className="bg-card border border-border rounded-lg p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Stripchat Account</h2>
+          </div>
+          <StripchatLookup stageName={performer.stageName} />
         </div>
       )}
 
