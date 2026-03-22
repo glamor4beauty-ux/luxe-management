@@ -1,9 +1,10 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle } from 'lucide-react';
+import { Calendar, BookOpen, Monitor, Upload, MessageSquare, HelpCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
 const navItems = [
   { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
+  { path: '/performer-performance', label: 'Performance', icon: TrendingUp },
   { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
   { path: '/performer-stripchat-view', label: 'Stripchat', icon: Monitor },
   { path: '/performer-upload', label: 'Upload', icon: Upload },
