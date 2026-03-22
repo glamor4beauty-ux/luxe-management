@@ -132,7 +132,7 @@ export default function PerformerView() {
             )}
           </div>
           {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <div className="grid grid-cols-4 gap-x-4 gap-y-3 text-sm">
             <div>
               <p className="text-xs text-muted-foreground mb-0.5">Recruiter</p>
               <p className="font-medium text-foreground">{performer.recruiterName || '—'}</p>
