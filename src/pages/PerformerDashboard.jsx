@@ -130,10 +130,8 @@ export default function PerformerDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-3">Welcome back, {user?.full_name}!</h1>
-        <div className="flex items-center gap-2 mb-4">
-          <p className="text-muted-foreground">Stage name: <span className="text-primary font-medium">{performer?.stageName || user?.stageName}</span></p>
-        </div>
+        <h1 className="text-3xl font-bold text-foreground mb-1">Welcome back, {user?.full_name}!</h1>
+        <p className="text-muted-foreground mb-3">Stage name: <span className="text-primary font-medium">{performer?.stageName || user?.stageName}</span></p>
         {/* Nav Buttons Under Name */}
         <div className="flex items-center gap-2">
           <Link to="/performer-instructions" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium transition-colors">
