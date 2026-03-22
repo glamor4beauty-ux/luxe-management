@@ -32,6 +32,7 @@ import Instructions from './pages/Instructions';
 import ShiftsDashboard from './pages/ShiftsDashboard';
 import PerformerTasks from './pages/PerformerTasks';
 import AdminKnowledgeBase from './pages/AdminKnowledgeBase';
+import PerformanceAnalytics from './pages/PerformanceAnalytics';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
         <Route path="/instructions" element={<Instructions />} />
         <Route path="/shifts-dashboard" element={<ShiftsDashboard />} />
         <Route path="/knowledge-base" element={<AdminKnowledgeBase />} />
+        <Route path="/analytics" element={<PerformanceAnalytics />} />
       </Route>
       <Route element={<PerformerMobileLayout />}>
         <Route path="/performer-dashboard" element={<PerformerDashboard />} />
@@ -99,6 +101,7 @@ const AuthenticatedApp = () => {
         <Route path="/performer-stripchat-view" element={<PerformerStripchatView />} />
         <Route path="/performer-upload" element={<PerformerUpload />} />
         <Route path="/performer-support" element={<SupportContact />} />
+        <Route path="/performer-analytics" element={<PerformanceAnalytics />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
