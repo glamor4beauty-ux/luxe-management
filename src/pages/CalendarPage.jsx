@@ -23,8 +23,13 @@ export default function CalendarPage() {
 
   const load = async () => {
     setLoading(true);
-    const data = await base44.entities.Calendar.list('-created_date');
-    setEvents(data);
+    try {
+      const data = await base44.entities.Calendar.list('-created_date');
+      setEvents(data);
+    } catch (e) {
+      console.error('Failed to load calendar:', e);
+      toast.error('Failed to load calendar events');
+    }
     setLoading(false);
   };
 
