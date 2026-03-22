@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const navItems = [
+  { path: '/performer-dashboard', label: 'Home', icon: Calendar },
   { path: '/performer-schedule', label: 'Schedule', icon: Calendar },
   { path: '/performer-performance', label: 'Performance', icon: TrendingUp },
   { path: '/performer-knowledge', label: 'Knowledge', icon: BookOpen },
