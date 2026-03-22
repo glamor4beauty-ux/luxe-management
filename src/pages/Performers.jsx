@@ -119,19 +119,19 @@ export default function Performers() {
 
       {activeTab === 'classroom' && <ClassroomGuide userRole={user?.role} />}
 
-      {activeTab === 'roster' && <div className="mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, email, or stage name..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-10 bg-card border-border text-foreground h-9"
-          />
+      {activeTab === 'roster' && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, or stage name..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 bg-card border-border text-foreground h-9"
+            />
+          </div>
         </div>
-      </div>
-
-      </div>}
+      )}
 
       {activeTab === 'roster' && loading ? (
         <div className="flex items-center justify-center h-40">
