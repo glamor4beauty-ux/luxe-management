@@ -81,14 +81,19 @@ export default function Users() {
     if (!data) return;
     const user = users.find(u => u.id === userId);
     try {
-      await base44.asServiceRole.entities.User.update(userId, data);
-      // Sync to UserCredentials
       const creds = await base44.entities.UserCredentials.filter({ email: user.email });
-      const credData = { email: data.email || user.email, password: data.password ?? user.password ?? '', role: data.role || user.role, stageName: data.stageName ?? user.stageName ?? '', full_name: data.full_name || user.full_name, userId };
+      const credData = {
+        email: data.email || user.email,
+        password: data.password ?? user.password ?? '',
+        role: data.role || user.role,
+        stageName: data.stageName ?? user.stageName ?? '',
+        full_name: data.full_name || user.full_name,
+        userId: user.id,
+      };
       if (creds.length > 0) {
-        await base44.asServiceRole.entities.UserCredentials.update(creds[0].id, credData);
+        await base44.entities.UserCredentials.update(creds[0].id, credData);
       } else {
-        await base44.asServiceRole.entities.UserCredentials.create(credData);
+        await base44.entities.UserCredentials.create(credData);
       }
       toast.success('User updated');
       setEditingData(prev => ({ ...prev, [userId]: undefined }));
