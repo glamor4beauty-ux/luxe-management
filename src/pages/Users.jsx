@@ -30,8 +30,8 @@ export default function Users() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const creds = await base44.entities.UserCredentials.list('-created_date', 200);
-      // Map UserCredentials fields to match User shape
+      const res = await base44.functions.invoke('manageUserCredential', { action: 'list' });
+      const creds = res.data.creds || [];
       const mapped = creds.map(c => ({
         id: c.userId || c.id,
         _credId: c.id,
@@ -81,7 +81,6 @@ export default function Users() {
     if (!data) return;
     const user = users.find(u => u.id === userId);
     try {
-      const creds = await base44.entities.UserCredentials.filter({ email: user.email });
       const credData = {
         email: data.email || user.email,
         password: data.password ?? user.password ?? '',
@@ -90,16 +89,17 @@ export default function Users() {
         full_name: data.full_name || user.full_name,
         userId: user.id,
       };
-      if (creds.length > 0) {
-        await base44.entities.UserCredentials.update(creds[0].id, credData);
-      } else {
-        await base44.entities.UserCredentials.create(credData);
-      }
+      const res = await base44.functions.invoke('manageUserCredential', {
+        action: 'update',
+        credId: user._credId,
+        data: credData,
+      });
+      if (!res.data.success) throw new Error(res.data.error);
       toast.success('User updated');
       setEditingData(prev => ({ ...prev, [userId]: undefined }));
       loadUsers();
     } catch (e) {
-      toast.error('Failed to update user');
+      toast.error('Failed to update user: ' + (e.message || ''));
     }
   };
 
@@ -116,20 +116,21 @@ export default function Users() {
       return;
     }
     try {
-      // Check for duplicate
-      const existing = await base44.entities.UserCredentials.filter({ email: addForm.email });
-      if (existing.length > 0) {
-        toast.error('A user with this email already exists');
+      const res = await base44.functions.invoke('manageUserCredential', {
+        action: 'create',
+        data: {
+          email: addForm.email,
+          password: addForm.password,
+          role: addForm.role,
+          full_name: addForm.full_name,
+          stageName: addForm.stageName || '',
+          userId: '',
+        }
+      });
+      if (!res.data.success) {
+        toast.error(res.data.error || 'Failed to add user');
         return;
       }
-      await base44.entities.UserCredentials.create({
-        email: addForm.email,
-        password: addForm.password,
-        role: addForm.role,
-        full_name: addForm.full_name,
-        stageName: addForm.stageName || '',
-        userId: '',
-      });
       toast.success('User added');
       setAddDialogOpen(false);
       setAddForm({ full_name: '', email: '', password: '', role: 'performer', stageName: '' });
