@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Upload, Send, Loader2, FileText, X, MessageSquare } from 'lucide-react';
+import { Upload, Send, Loader2, FileText, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -20,48 +20,79 @@ export default function KnowledgeBase() {
   const [messages, setMessages] = useState([
     { type: 'assistant', content: GREETING.greeting, timestamp: new Date() }
   ]);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedDocs, setUploadedDocs] = useState([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [docCount, setDocCount] = useState(0);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Load existing documents on mount
+  useEffect(() => {
+    loadDocuments();
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const loadDocuments = async () => {
+    try {
+      const docs = await base44.entities.KnowledgeBaseEntry.list('-created_date', 100);
+      setDocCount(docs.length);
+      const docNames = docs.map(d => d.fileName);
+      setUploadedDocs(docNames);
+    } catch (e) {
+      console.error('Failed to load documents');
+    }
+  };
+
   const handleFileUpload = async (files) => {
     if (!files.length) return;
     
     setUploading(true);
-    const newFiles = [];
-    
+    let successCount = 0;
+
     for (const file of files) {
       try {
         if (!['text/plain', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
-          toast.error(`${file.name} is not supported. Use .txt, .pdf, or .docx`);
+          toast.error(`${file.name} not supported. Use .txt, .pdf, or .docx`);
           continue;
         }
 
+        // Upload file
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        newFiles.push({ name: file.name, url: file_url, type: file.type });
+
+        // Process file and extract content
+        const response = await base44.functions.invoke('processKnowledgebaseFile', {
+          fileUrl: file_url,
+          fileName: file.name,
+          fileType: file.type
+        });
+
+        if (response.data.success) {
+          successCount++;
+          setUploadedDocs(prev => [...prev, file.name]);
+          setDocCount(prev => prev + 1);
+        } else {
+          toast.error(`Failed to process ${file.name}`);
+        }
       } catch (e) {
-        toast.error(`Failed to upload ${file.name}`);
+        toast.error(`Error uploading ${file.name}: ${e.message}`);
       }
     }
 
-    setUploadedFiles(prev => [...prev, ...newFiles]);
-    if (newFiles.length > 0) {
-      toast.success(`${newFiles.length} file(s) uploaded successfully`);
+    if (successCount > 0) {
+      toast.success(`${successCount} file(s) processed and stored`);
     }
     setUploading(false);
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query.trim() || uploadedFiles.length === 0) {
-      if (uploadedFiles.length === 0) {
+    if (!query.trim() || docCount === 0) {
+      if (docCount === 0) {
         toast.error('Please upload documents first');
       }
       return;
@@ -73,22 +104,26 @@ export default function KnowledgeBase() {
     setLoading(true);
 
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are Megan, a helpful assistant for LUXE Talent Systems. A performer is asking: "${userMessage}"\n\nUse the uploaded documents to find relevant information and provide a clear, helpful answer. If the information is not in the documents, say so and provide general guidance.`,
-        file_urls: uploadedFiles.map(f => f.url),
-        model: 'automatic'
+      const response = await base44.functions.invoke('searchKnowledgeBase', {
+        query: userMessage
       });
 
-      setMessages(prev => [...prev, { type: 'assistant', content: response, timestamp: new Date() }]);
+      if (response.data.success) {
+        setMessages(prev => [...prev, { 
+          type: 'assistant', 
+          content: response.data.answer,
+          docsSearched: response.data.docsSearched,
+          timestamp: new Date() 
+        }]);
+      } else {
+        toast.error(response.data.error || 'Failed to search');
+        setMessages(prev => prev.slice(0, -1));
+      }
     } catch (e) {
-      toast.error('Failed to process query');
+      toast.error('Search failed');
       setMessages(prev => prev.slice(0, -1));
     }
     setLoading(false);
-  };
-
-  const removeFile = (idx) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleDragOver = (e) => {
@@ -114,6 +149,9 @@ export default function KnowledgeBase() {
                 : 'bg-card border border-border text-foreground'
             }`}>
               <p className="text-sm leading-relaxed">{msg.content}</p>
+              {msg.docsSearched && (
+                <p className="text-xs mt-2 opacity-70">Searched {msg.docsSearched} document(s)</p>
+              )}
             </div>
           </div>
         ))}
@@ -121,33 +159,35 @@ export default function KnowledgeBase() {
           <div className="flex justify-start">
             <div className="bg-card border border-border rounded-lg p-3 flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Megan is thinking...</span>
+              <span className="text-sm text-muted-foreground">Megan is searching documents...</span>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Uploaded Files */}
-      {uploadedFiles.length > 0 && (
+      {/* Uploaded Documents Status */}
+      {docCount > 0 && (
         <div className="border-t border-border px-4 py-3 bg-card">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Uploaded Documents ({uploadedFiles.length})</p>
+          <p className="text-xs font-medium text-muted-foreground mb-2">Knowledge Base ({docCount} document{docCount !== 1 ? 's' : ''})</p>
           <div className="flex flex-wrap gap-2">
-            {uploadedFiles.map((file, idx) => (
+            {uploadedDocs.slice(0, 5).map((name, idx) => (
               <div key={idx} className="flex items-center gap-1 bg-secondary rounded-lg px-2.5 py-1.5">
                 <FileText className="h-3 w-3 text-primary" />
-                <span className="text-xs text-foreground truncate max-w-[150px]">{file.name}</span>
-                <button onClick={() => removeFile(idx)} className="ml-1 text-muted-foreground hover:text-foreground">
-                  <X className="h-3 w-3" />
-                </button>
+                <span className="text-xs text-foreground truncate max-w-[120px]">{name}</span>
               </div>
             ))}
+            {uploadedDocs.length > 5 && (
+              <div className="flex items-center gap-1 bg-secondary rounded-lg px-2.5 py-1.5">
+                <span className="text-xs text-muted-foreground">+{uploadedDocs.length - 5} more</span>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Upload Area / Suggestions */}
-      {uploadedFiles.length === 0 && (
+      {docCount === 0 && (
         <div className="border-t border-border px-4 py-4 bg-card space-y-3">
           <div 
             onDragOver={handleDragOver}
@@ -163,7 +203,7 @@ export default function KnowledgeBase() {
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Sample questions:</p>
             {GREETING.suggestions.map((s, i) => (
-              <button key={i} onClick={() => { setQuery(s); }} className="block text-xs text-primary hover:underline text-left w-full">
+              <button key={i} onClick={() => setQuery(s)} className="block text-xs text-primary hover:underline text-left w-full">
                 • {s}
               </button>
             ))}
@@ -196,12 +236,12 @@ export default function KnowledgeBase() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Ask a question..."
-            disabled={loading || uploadedFiles.length === 0}
+            disabled={loading || docCount === 0}
             className="bg-secondary border-border text-foreground flex-1 h-9 text-sm"
           />
           <Button
             type="submit"
-            disabled={loading || !query.trim() || uploadedFiles.length === 0}
+            disabled={loading || !query.trim() || docCount === 0}
             className="bg-primary text-primary-foreground h-9 px-4"
           >
             <Send className="h-4 w-4" />
