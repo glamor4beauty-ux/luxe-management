@@ -15,19 +15,40 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'fileUrl and fileName required' }, { status: 400 });
     }
 
-    // Extract content from file using LLM vision + context
-    const extractedContent = await base44.integrations.Core.InvokeLLM({
-      prompt: `Extract all text content from this file. Return the complete text content without modification. File name: ${fileName}`,
-      file_urls: [fileUrl],
-      model: 'automatic'
-    });
+    let extractedText = '';
 
-    // Store in database
+    if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      // DOCX: use ExtractDataFromUploadedFile
+      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url: fileUrl,
+        json_schema: {
+          type: 'object',
+          properties: {
+            content: { type: 'string', description: 'All text content from the document' }
+          }
+        }
+      });
+      extractedText = result?.output?.content || JSON.stringify(result?.output || '');
+    } else {
+      // PDF, TXT: use LLM with file_urls
+      extractedText = await base44.integrations.Core.InvokeLLM({
+        prompt: `Extract all text content from this file. Return the complete text content without modification. File name: ${fileName}`,
+        file_urls: [fileUrl],
+        model: 'automatic'
+      });
+    }
+
+    // Upload extracted text as a file to avoid entity size limits
+    const textBlob = new Blob([extractedText], { type: 'text/plain' });
+    const textFile = new File([textBlob], `${fileName}.txt`, { type: 'text/plain' });
+    const { file_url: contentUrl } = await base44.integrations.Core.UploadFile({ file: textFile });
+
+    // Store content URL in extractedContent field
     const entry = await base44.asServiceRole.entities.KnowledgeBaseEntry.create({
       fileName,
       fileUrl,
       fileType: fileType || 'unknown',
-      extractedContent,
+      extractedContent: contentUrl,
       uploadedBy: user.email
     });
 
@@ -39,8 +60,8 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Error processing file:', error);
-    return Response.json({ 
-      error: error.message || 'Failed to process file' 
+    return Response.json({
+      error: error.message || 'Failed to process file'
     }, { status: 500 });
   }
 });
