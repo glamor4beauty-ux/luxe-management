@@ -31,27 +31,6 @@ export default function AdminKnowledgeBase() {
     setLoading(false);
   };
 
-  const handleFileUpload = async (files) => {
-    if (!files.length) return;
-    
-    setUploading(true);
-    let successCount = 0;
-
-    for (const file of files) {
-      try {
-        const validExts = ['.txt', '.pdf', '.docx'];
-        const hasValidExt = validExts.some(ext => file.name.toLowerCase().endsWith(ext));
-        if (!hasValidExt) {
-          toast.error(`${file.name} not supported`);
-          continue;
-        }
-
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        const mimeTypes = {
-          '.pdf': 'application/pdf',
-          '.txt': 'text/plain',
-          '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        };
         const ext = Object.keys(mimeTypes).find(e => file.name.toLowerCase().endsWith(e));
         const fileType = ext ? mimeTypes[ext] : file.type;
         const response = await base44.functions.invoke('processKnowledgebaseFile', {
