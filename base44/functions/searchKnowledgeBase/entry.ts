@@ -25,12 +25,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Combine all extracted content into one context
-    const combinedContent = allEntries
-      .map(entry => `[From: ${entry.fileName}]\n${entry.extractedContent}`)
-      .join('\n\n---\n\n');
+    // Fetch content for each entry (may be a URL or inline text)
+    const contents = await Promise.all(allEntries.map(async (entry) => {
+      let text = entry.extractedContent || '';
+      if (text.startsWith('http')) {
+        try {
+          const res = await fetch(text);
+          text = await res.text();
+        } catch (e) {
+          text = '';
+        }
+      }
+      return `[From: ${entry.fileName}]\n${text}`;
+    }));
 
-    // Use LLM to search and answer based on all combined content
+    const combinedContent = contents.join('\n\n---\n\n');
+
     const answer = await base44.integrations.Core.InvokeLLM({
       prompt: `You are Megan, a helpful assistant for LUXE Talent Systems. 
       
@@ -53,8 +63,8 @@ Provide a clear, conversational answer.`,
     });
   } catch (error) {
     console.error('Error searching knowledge base:', error);
-    return Response.json({ 
-      error: error.message || 'Failed to search knowledge base' 
+    return Response.json({
+      error: error.message || 'Failed to search knowledge base'
     }, { status: 500 });
   }
 });
