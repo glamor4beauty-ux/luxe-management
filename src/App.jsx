@@ -25,6 +25,7 @@ import PerformerDashboard from './pages/PerformerDashboard';
 import PerformerShifts from './pages/PerformerShifts';
 import SupportContact from './pages/SupportContact';
 import PerformerKnowledgeBase from './pages/PerformerKnowledgeBase';
+import AdminKnowledgeBase from './pages/AdminKnowledgeBase';
 import PerformerProfile from './pages/PerformerProfile';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import Users from './pages/Users';
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/instructions" element={<Instructions />} />
         <Route path="/shifts-dashboard" element={<ShiftsDashboard />} />
+        <Route path="/knowledge-base" element={<AdminKnowledgeBase />} />
         <Route path="/analytics" element={<PerformanceAnalytics />} />
         <Route path="/leads" element={<Leads />} />
       </Route>
