@@ -50,7 +50,8 @@ export default function PerformerKnowledgeBase() {
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: `I've added "${res.data.fileName}" to the knowledge base. Feel free to ask me questions about it!`
-      } else {
+        }]);
+        } else {
         toast.error(res.data.error || 'Failed to upload document');
       }
     } catch (e) {
