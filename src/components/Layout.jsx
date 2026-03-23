@@ -138,6 +138,13 @@ export default function Layout() {
               </SidebarMenu>
               <div className="border-t border-sidebar-border pt-3 mt-auto px-3">
                 <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:text-destructive hover:bg-destructive/10 transition-colors font-medium"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
             </SidebarContent>
           </Sidebar>
           <SidebarInset>
