@@ -127,7 +127,6 @@ export default function PerformerKnowledgeBase() {
             </div>
           </div>
         )}
-        </div>
       </div>
 
       {/* Chat Area */}
@@ -182,7 +181,6 @@ export default function PerformerKnowledgeBase() {
         {documents.length === 0 && (
           <p className="text-xs text-muted-foreground mt-2">Upload at least one document to start asking questions.</p>
         )}
-      </div>
       </div>
     </div>
   );
