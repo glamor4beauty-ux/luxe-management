@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { FileText, Trash2, Loader2, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +11,20 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function AdminKnowledgeBase() {
+  const { user } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
   const fileInputRef = useRef(null);
+
+  if (user?.role !== 'admin') {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">Admin access required.</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     loadEntries();
