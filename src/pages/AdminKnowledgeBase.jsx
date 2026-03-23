@@ -23,8 +23,8 @@ export default function AdminKnowledgeBase() {
   const loadEntries = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.KnowledgeBaseEntry.list('-created_date', 100);
-      setEntries(data || []);
+      const res = await base44.functions.invoke('listKnowledgeBase', {});
+      setEntries(res.data.entries || []);
     } catch (e) {
       toast.error('Failed to load entries');
     }
