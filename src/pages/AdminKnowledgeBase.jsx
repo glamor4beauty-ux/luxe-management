@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { FileText, Trash2, Loader2, Upload } from 'lucide-react';
+import { FileText, Trash2, Loader2, Upload, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -34,9 +34,10 @@ export default function AdminKnowledgeBase() {
     setLoading(true);
     try {
       const res = await base44.functions.invoke('listKnowledgeBase', {});
-      setEntries(res.data.entries || []);
+      setEntries(res.data?.entries || []);
     } catch (e) {
-      toast.error('Failed to load entries');
+      console.error('Load error:', e);
+      setEntries([]);
     }
     setLoading(false);
   };
@@ -69,31 +70,28 @@ export default function AdminKnowledgeBase() {
         };
         const ext = Object.keys(mimeTypes).find(e => file.name.toLowerCase().endsWith(e));
         const fileType = ext ? mimeTypes[ext] : file.type;
+
         const response = await base44.functions.invoke('processKnowledgebaseFile', {
           fileUrl: file_url,
           fileName: file.name,
-          fileType: fileType
+          fileType
         });
 
         if (response?.data?.success) {
           successCount++;
-          toast.success(`${file.name} uploaded`);
-        } else {
-          toast.error(`${file.name} processing failed`);
         }
       } catch (e) {
         console.error('Upload error:', e);
-        toast.error(`Error uploading ${file.name}: ${e.message}`);
+        toast.error(`Error uploading ${file.name}`);
       }
     }
 
-    if (successCount > 0) {
-      toast.success(`Total: ${successCount} file(s) processed`);
-      loadEntries();
-    } else if (files.length > 0) {
-      toast.error('No files were uploaded successfully');
-    }
     setUploading(false);
+    if (successCount > 0) {
+      toast.success(`${successCount} file(s) uploaded`);
+      loadEntries();
+    }
+    fileInputRef.current.value = '';
   };
 
   const handleDelete = async (id) => {
@@ -102,12 +100,12 @@ export default function AdminKnowledgeBase() {
       setEntries(prev => prev.filter(e => e.id !== id));
       toast.success('Document deleted');
     } catch (e) {
-      toast.error('Failed to delete document');
+      toast.error('Failed to delete');
     }
   };
 
   const filtered = entries.filter(e => 
-    e.fileName?.toLowerCase().includes(search.toLowerCase())
+    !search || e.fileName?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) {
@@ -136,79 +134,80 @@ export default function AdminKnowledgeBase() {
         <Button 
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-          Upload Document
+          Upload
         </Button>
       </div>
 
-      <Input
-        placeholder="Search documents..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="bg-card border-border text-foreground h-9 mb-4"
-      />
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search documents..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="bg-card border-border text-foreground h-9 pl-10"
+        />
+      </div>
 
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No documents found. Upload knowledge base files.</p>
+          <p>No documents found.</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">File Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Type</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Uploaded By</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Date</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Action</th>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-secondary/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">File Name</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Type</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Uploaded By</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Date</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(entry => (
+                <tr key={entry.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="text-foreground font-medium">{entry.fileName}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground text-sm">
+                    {entry.fileName?.endsWith('.pdf') ? 'PDF' : 
+                     entry.fileName?.endsWith('.txt') ? 'TXT' :
+                     entry.fileName?.endsWith('.docx') ? 'DOCX' : 'File'}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground text-sm">{entry.uploadedBy || '—'}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-sm">
+                    {entry.created_date ? new Date(entry.created_date).toLocaleDateString() : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-8">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-card border-border">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                          <AlertDialogDescription>Remove "{entry.fileName}" from knowledge base?</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(entry.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map(entry => (
-                  <tr key={entry.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span className="text-foreground font-medium">{entry.fileName}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground text-sm">
-                      {entry.fileName?.endsWith('.pdf') ? 'PDF' : 
-                       entry.fileName?.endsWith('.txt') ? 'TXT' :
-                       entry.fileName?.endsWith('.docx') ? 'DOCX' : 'File'}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground text-sm">{entry.uploadedBy || '—'}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-sm">
-                      {entry.created_date ? new Date(entry.created_date).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-card border-border">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                            <AlertDialogDescription>This will remove "{entry.fileName}" from the knowledge base.</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(entry.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
