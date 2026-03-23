@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import AdminNotifications from './AdminNotifications';
-import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut, HelpCircle, Menu, X, BookOpen, TrendingUp } from 'lucide-react';
+import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut, HelpCircle, Menu, X, BookOpen, TrendingUp, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
@@ -19,6 +19,7 @@ const adminNavItems = [
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
   { path: '/analytics', label: 'Analytics', icon: TrendingUp },
+  { path: '/leads', label: 'Leads', icon: UserPlus },
   { path: '/instructions', label: 'Instructions', icon: HelpCircle },
 ];
 
@@ -31,6 +32,7 @@ const recruiterNavItems = [
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
   { path: '/analytics', label: 'Analytics', icon: TrendingUp },
+  { path: '/leads', label: 'Leads', icon: UserPlus },
 ];
 
 export default function Layout() {
