@@ -34,9 +34,9 @@ Deno.serve(async (req) => {
     }
 
     // Upload extracted text as a file to avoid entity size limits
-    const textBlob = new Blob([extractedText], { type: 'text/plain' });
-    const textFile = new File([textBlob], `${fileName}.txt`, { type: 'text/plain' });
-    const { file_url: contentUrl } = await base44.integrations.Core.UploadFile({ file: textFile });
+    const encoder = new TextEncoder();
+    const textBuffer = encoder.encode(extractedText);
+    const { file_url: contentUrl } = await base44.integrations.Core.UploadFile({ file: textBuffer });
 
     const entry = await base44.asServiceRole.entities.KnowledgeBaseEntry.create({
       fileName,
