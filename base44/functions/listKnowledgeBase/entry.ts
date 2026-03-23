@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const entries = await base44.asServiceRole.entities.KnowledgeBaseEntry.list('-created_date', 1000);
+    const entries = await base44.entities.KnowledgeBaseEntry.list('-created_date', 1000);
 
     return Response.json({ success: true, entries });
   } catch (error) {
