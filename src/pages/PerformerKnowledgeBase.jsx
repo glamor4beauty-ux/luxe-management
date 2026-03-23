@@ -182,6 +182,7 @@ export default function PerformerKnowledgeBase() {
           <p className="text-xs text-muted-foreground mt-2">Upload at least one document to start asking questions.</p>
         )}
       </div>
+      </div>
     </div>
   );
 }
