@@ -11,8 +11,12 @@ export default function NotificationBell() {
 
   const load = async () => {
     if (!user?.email) return;
-    const all = await base44.entities.Notification.filter({ recipientEmail: user.email });
-    setNotifications(all.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+    try {
+      const all = await base44.entities.Notification.filter({ recipientEmail: user.email });
+      setNotifications(all.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)));
+    } catch (e) {
+      // Entity may not be ready yet, silently ignore
+    }
   };
 
   useEffect(() => {
@@ -33,13 +37,13 @@ export default function NotificationBell() {
   }, [notifications.length]);
 
   const markRead = async (id) => {
-    await base44.entities.Notification.update(id, { isRead: true });
+    try { await base44.entities.Notification.update(id, { isRead: true }); } catch (e) {}
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
   const markAllRead = async () => {
     const unread = notifications.filter(n => !n.isRead);
-    await Promise.all(unread.map(n => base44.entities.Notification.update(n.id, { isRead: true })));
+    try { await Promise.all(unread.map(n => base44.entities.Notification.update(n.id, { isRead: true }))); } catch (e) {}
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
