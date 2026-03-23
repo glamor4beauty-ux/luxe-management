@@ -20,6 +20,7 @@ const adminNavItems = [
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
   { path: '/knowledge-base', label: 'Knowledge Base', icon: BookOpen },
+  { path: '/users', label: 'Users', icon: Users },
   { path: '/analytics', label: 'Analytics', icon: TrendingUp },
   { path: '/leads', label: 'Leads', icon: UserPlus },
   { path: '/instructions', label: 'Instructions', icon: HelpCircle },
