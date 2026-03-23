@@ -131,7 +131,7 @@ export default function AdminKnowledgeBase() {
 
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No documents found. Upload knowledge base files for performers.</p>
+          <p>No documents found. Upload knowledge base files.</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-lg overflow-hidden">
