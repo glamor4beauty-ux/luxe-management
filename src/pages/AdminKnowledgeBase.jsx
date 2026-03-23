@@ -39,7 +39,9 @@ export default function AdminKnowledgeBase() {
 
     for (const file of files) {
       try {
-        if (!['text/plain', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+        const validExts = ['.txt', '.pdf', '.docx'];
+        const hasValidExt = validExts.some(ext => file.name.toLowerCase().endsWith(ext));
+        if (!hasValidExts.some(ext => file.name.toLowerCase().endsWith(ext))) {
           toast.error(`${file.name} not supported`);
           continue;
         }
