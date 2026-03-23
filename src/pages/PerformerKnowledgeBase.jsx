@@ -83,23 +83,23 @@ export default function PerformerKnowledgeBase() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex h-screen bg-background flex-col md:flex-row">
       {/* Header */}
-      <div className="bg-card border-b border-border p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="bg-card border-b md:border-b-0 md:border-r border-border p-4 sticky top-0 md:static z-10 md:w-64 md:flex md:flex-col">
+        <div className="flex items-center gap-2 mb-4">
           <BookOpen className="h-5 w-5 text-primary" />
           <h1 className="text-lg font-semibold text-foreground">Knowledge Base</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap md:flex-col md:w-full">
           <Button
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="border-border h-8 text-xs"
+            className="border-border h-8 text-xs md:w-full"
           >
             {uploading ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Upload className="h-3 w-3 mr-1.5" />}
-            Upload Document
+            Upload
           </Button>
           <input
             ref={fileInputRef}
@@ -109,11 +109,29 @@ export default function PerformerKnowledgeBase() {
             className="hidden"
           />
           {documents.length > 0 && (
-            <span className="text-xs text-muted-foreground ml-auto">{documents.length} document{documents.length !== 1 ? 's' : ''} loaded</span>
+            <span className="text-xs text-muted-foreground md:mt-3">{documents.length} document{documents.length !== 1 ? 's' : ''} loaded</span>
           )}
+        </div>
+
+        {/* Documents List - Desktop */}
+        {documents.length > 0 && (
+          <div className="hidden md:block mt-6 flex-1 overflow-y-auto">
+            <p className="text-xs font-semibold text-muted-foreground mb-3">Documents</p>
+            <div className="space-y-2">
+              {documents.map(doc => (
+                <div key={doc.id} className="bg-secondary/50 rounded-lg p-2.5 text-xs border border-border/50">
+                  <p className="font-medium text-foreground truncate" title={doc.fileName}>{doc.fileName}</p>
+                  <p className="text-muted-foreground mt-1">{doc.category || 'General'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </div>
 
+      {/* Chat Area */}
+      <div className="flex flex-col flex-1 md:border-l border-border">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, idx) => (
@@ -142,7 +160,7 @@ export default function PerformerKnowledgeBase() {
       </div>
 
       {/* Input */}
-      <div className="bg-card border-t border-border p-4 sticky bottom-0">
+      <div className="bg-card border-t border-border p-4 sticky bottom-0 md:border-l-0">
         <form onSubmit={handleQuery} className="flex gap-2">
           <Input
             type="text"
@@ -164,6 +182,7 @@ export default function PerformerKnowledgeBase() {
         {documents.length === 0 && (
           <p className="text-xs text-muted-foreground mt-2">Upload at least one document to start asking questions.</p>
         )}
+      </div>
       </div>
     </div>
   );
