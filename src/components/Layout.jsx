@@ -69,7 +69,7 @@ export default function Layout() {
   return (
     <>
       {/* Mobile Header Only */}
-      <div className="block xl:hidden">
+      <div className="block md:hidden">
         <header className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
           <div className="flex items-center justify-between">
             <h1 className="text-base font-bold">
