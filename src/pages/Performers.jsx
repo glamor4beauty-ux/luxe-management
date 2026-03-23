@@ -39,12 +39,12 @@ export default function Performers() {
   useEffect(() => { load(); }, []);
 
   const handleDelete = async (id) => {
-    await base44.entities.Performer.delete(id);
+    await base44.functions.invoke('deletePerformer', { id });
     setPerformers(prev => prev.filter(p => p.id !== id));
   };
 
   const handleApprove = async (id) => {
-    await base44.entities.Performer.update(id, { approved: true });
+    await base44.functions.invoke('updatePerformer', { id, data: { approved: true } });
     setPerformers(prev => prev.map(p => p.id === id ? { ...p, approved: true } : p));
   };
 
