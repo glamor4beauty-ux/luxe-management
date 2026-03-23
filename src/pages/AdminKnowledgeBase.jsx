@@ -156,9 +156,9 @@ export default function AdminKnowledgeBase() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-sm">
-                      {entry.fileType === 'application/pdf' ? 'PDF' : 
-                       entry.fileType === 'text/plain' ? 'TXT' :
-                       entry.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' : 'File'}
+                      {entry.fileName?.endsWith('.pdf') ? 'PDF' : 
+                       entry.fileName?.endsWith('.txt') ? 'TXT' :
+                       entry.fileName?.endsWith('.docx') ? 'DOCX' : 'File'}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-sm">{entry.uploadedBy || '—'}</td>
                     <td className="px-4 py-3 text-muted-foreground text-sm">
