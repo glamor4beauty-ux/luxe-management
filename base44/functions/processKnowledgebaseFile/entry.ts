@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import mammoth from 'npm:mammoth@1.8.0';
 
 Deno.serve(async (req) => {
   try {
@@ -18,21 +19,15 @@ Deno.serve(async (req) => {
     let extractedText = '';
 
     if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      // DOCX: use ExtractDataFromUploadedFile
-      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url: fileUrl,
-        json_schema: {
-          type: 'object',
-          properties: {
-            content: { type: 'string', description: 'All text content from the document' }
-          }
-        }
-      });
-      extractedText = result?.output?.content || JSON.stringify(result?.output || '');
+      // DOCX: fetch the file and use mammoth to extract text
+      const fileRes = await fetch(fileUrl);
+      const arrayBuffer = await fileRes.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      extractedText = result.value || '';
     } else {
-      // PDF, TXT: use LLM with file_urls
+      // PDF, TXT: use LLM with file_urls (supports vision/images in PDFs too)
       extractedText = await base44.integrations.Core.InvokeLLM({
-        prompt: `Extract all text content from this file. Return the complete text content without modification. File name: ${fileName}`,
+        prompt: `Extract all text content from this file, including any text in images or diagrams. Return the complete content. File name: ${fileName}`,
         file_urls: [fileUrl],
         model: 'automatic'
       });
@@ -43,7 +38,6 @@ Deno.serve(async (req) => {
     const textFile = new File([textBlob], `${fileName}.txt`, { type: 'text/plain' });
     const { file_url: contentUrl } = await base44.integrations.Core.UploadFile({ file: textFile });
 
-    // Store content URL in extractedContent field
     const entry = await base44.asServiceRole.entities.KnowledgeBaseEntry.create({
       fileName,
       fileUrl,
