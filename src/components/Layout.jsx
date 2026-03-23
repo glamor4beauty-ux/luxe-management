@@ -148,7 +148,7 @@ export default function Layout() {
             </SidebarContent>
           </Sidebar>
           <SidebarInset>
-            <div className="p-4 md:p-6 lg:p-8">
+            <div className="px-4 pt-2 pb-8 md:px-6 lg:px-8">
               <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>
