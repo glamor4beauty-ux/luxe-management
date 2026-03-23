@@ -47,10 +47,17 @@ export default function AdminKnowledgeBase() {
         }
 
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const mimeTypes = {
+          '.pdf': 'application/pdf',
+          '.txt': 'text/plain',
+          '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        };
+        const ext = Object.keys(mimeTypes).find(e => file.name.toLowerCase().endsWith(e));
+        const fileType = ext ? mimeTypes[ext] : file.type;
         const response = await base44.functions.invoke('processKnowledgebaseFile', {
           fileUrl: file_url,
           fileName: file.name,
-          fileType: file.type
+          fileType: fileType
         });
 
         if (response.data.success) {
