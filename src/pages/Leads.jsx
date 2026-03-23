@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Plus, Trash2, Search, Save, Loader2, Upload } from 'lucide-react';
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const RESULTS = ['Open', 'Signed', 'Declined', 'No Response'];
-const EMPTY_FORM = { recruiter: '', stageName: '', fullName: '', phone: '', email: '', instagramUrl: '', country: '', results: 'Open' };
+const EMPTY_FORM = { recruiter: '', stageName: '', fullName: '', phone: '', email: '', instagramUrl: '', country: '', results: 'Open', notes: '' };
 
 const RESULTS_COLOR = {
   Open: 'bg-blue-500/10 text-blue-400',
@@ -300,6 +301,10 @@ export default function Leads() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Notes</Label>
+              <Textarea value={form.notes || ''} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="bg-secondary border-border mt-1 min-h-[80px]" placeholder="Add any notes..." />
             </div>
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-border">Cancel</Button>
