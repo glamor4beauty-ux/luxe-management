@@ -103,8 +103,7 @@ export default function AdminKnowledgeBase() {
           {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
           Upload Document
         </Button>
-      </div>
-      <input
+        <input
           ref={fileInputRef}
           type="file"
           multiple
@@ -112,6 +111,7 @@ export default function AdminKnowledgeBase() {
           onChange={(e) => handleFileUpload(e.target.files)}
           className="hidden"
         />
+      </div>
 
       <Input
           placeholder="Search documents..."
