@@ -84,6 +84,7 @@ export default function AdminKnowledgeBase() {
       toast.error('No files were uploaded successfully');
     }
     setUploading(false);
+  };
 
   const handleDelete = async (id) => {
     try {
