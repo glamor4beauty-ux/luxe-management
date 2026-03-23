@@ -41,7 +41,7 @@ export default function AdminKnowledgeBase() {
       try {
         const validExts = ['.txt', '.pdf', '.docx'];
         const hasValidExt = validExts.some(ext => file.name.toLowerCase().endsWith(ext));
-        if (!hasValidExts.some(ext => file.name.toLowerCase().endsWith(ext))) {
+        if (!hasValidExt) {
           toast.error(`${file.name} not supported`);
           continue;
         }
