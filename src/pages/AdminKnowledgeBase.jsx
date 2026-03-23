@@ -34,11 +34,7 @@ export default function AdminKnowledgeBase() {
     setLoading(true);
     try {
       const res = await base44.functions.invoke('listKnowledgeBase', {});
-      setEntries(res.data?.entries || []);
-    } catch (e) {
-      console.error('Load error:', e);
-      setEntries([]);
-    }
+      setEntries(res.data.entries || []);
     setLoading(false);
   };
 
