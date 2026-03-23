@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Plus, Trash2, Search, Save, Loader2, Upload } from 'lucide-react';
+import { Plus, Trash2, Search, Save, Loader2, Upload, FileText } from 'lucide-react';
+import LeadTemplates from '@/components/leads/LeadTemplates';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ export default function Leads() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const load = async () => {
@@ -156,6 +158,9 @@ export default function Leads() {
           <p className="text-sm text-muted-foreground mt-1">{filtered.length} leads</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setTemplatesOpen(true)} className="border-border">
+            <FileText className="h-4 w-4 mr-2" /> Templates
+          </Button>
           <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="border-border">
             {uploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
             Import
@@ -250,6 +255,8 @@ export default function Leads() {
           </div>
         </div>
       )}
+
+      <LeadTemplates open={templatesOpen} onClose={() => setTemplatesOpen(false)} recruiterName={user?.full_name} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-card border-border max-w-lg">
