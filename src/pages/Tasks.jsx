@@ -41,13 +41,23 @@ export default function Tasks() {
 
   const load = async () => {
     setLoading(true);
-    const [t, p, u] = await Promise.all([
-      base44.entities.Task.list('-created_date'),
+    const [allTasks, allPerformers, u] = await Promise.all([
+      base44.entities.Task.list('-created_date', 500),
       base44.entities.Performer.list(),
       base44.entities.User.list(),
     ]);
-    setTasks(t);
-    setPerformers(p);
+    let tasks = allTasks;
+    let performers = allPerformers;
+    if (user?.role === 'recruiter') {
+      performers = allPerformers.filter(p => p.recruiterName === user.full_name);
+      const stageNames = new Set(performers.map(p => p.stageName));
+      tasks = allTasks.filter(t =>
+        (t.performerStageName && stageNames.has(t.performerStageName)) ||
+        t.assignedTo === user.email
+      );
+    }
+    setTasks(tasks);
+    setPerformers(performers);
     setUsers(u);
     setLoading(false);
   };

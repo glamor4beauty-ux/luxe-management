@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Plus, Trash2, Search, Save, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function CalendarPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -24,7 +26,12 @@ export default function CalendarPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.Calendar.list('-created_date');
+      let data = await base44.entities.Calendar.list('-created_date', 500);
+      if (user?.role === 'recruiter') {
+        const myPerformers = await base44.entities.Performer.filter({ recruiterName: user.full_name });
+        const stageNames = new Set(myPerformers.map(p => p.stageName));
+        data = data.filter(e => stageNames.has(e.stageName));
+      }
       setEvents(data);
     } catch (e) {
       console.error('Failed to load calendar:', e);

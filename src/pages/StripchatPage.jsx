@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Plus, Trash2, Search, Save, Loader2, Pencil } from 'lucide-react';
 import EarningsLookup from '../components/stripchat/EarningsLookup';
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
 const emptyForm = { stageName: '', profileUrl: '', status: 'pending', earnings: 0, followers: 0, notes: '' };
 
 export default function StripchatPage() {
+  const { user } = useAuth();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -32,7 +34,12 @@ export default function StripchatPage() {
 
   const load = async () => {
     setLoading(true);
-    const data = await base44.entities.Stripchat.list('-created_date');
+    let data = await base44.entities.Stripchat.list('-created_date', 500);
+    if (user?.role === 'recruiter') {
+      const myPerformers = await base44.entities.Performer.filter({ recruiterName: user.full_name });
+      const stageNames = new Set(myPerformers.map(p => p.stageName));
+      data = data.filter(s => stageNames.has(s.stageName));
+    }
     setProfiles(data);
     setLoading(false);
   };

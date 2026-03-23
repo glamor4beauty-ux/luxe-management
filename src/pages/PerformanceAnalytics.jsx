@@ -44,7 +44,9 @@ export default function PerformanceAnalytics() {
       ]);
 
       let performerList = allPerformers;
-      if (!isAdmin) {
+      if (user?.role === 'recruiter') {
+        performerList = allPerformers.filter(p => p.recruiterName === user?.full_name);
+      } else if (!isAdmin) {
         performerList = allPerformers.filter(p => p.stageName === user?.stageName);
       }
       setPerformers(performerList);

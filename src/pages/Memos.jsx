@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Plus, Trash2, Search, Save, X, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function Memos() {
+  const { user } = useAuth();
   const [memos, setMemos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -24,7 +26,12 @@ export default function Memos() {
 
   const load = async () => {
     setLoading(true);
-    const data = await base44.entities.Memo.list('-created_date');
+    let data = await base44.entities.Memo.list('-created_date', 500);
+    if (user?.role === 'recruiter') {
+      const myPerformers = await base44.entities.Performer.filter({ recruiterName: user.full_name });
+      const emails = new Set(myPerformers.map(p => p.email));
+      data = data.filter(m => emails.has(m.email));
+    }
     setMemos(data);
     setLoading(false);
   };

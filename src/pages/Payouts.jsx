@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Plus, Trash2, Search, Save, Loader2, CheckCircle, DollarSign, TrendingUp, RefreshCw, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ const fmt = (n) => `$${(n || 0).toLocaleString('en-US', { minimumFractionDigits:
 const fmtTk = (n) => `${(n || 0).toLocaleString()} tk`;
 
 export default function Payouts() {
+  const { user } = useAuth();
   const [tab, setTab] = useState('summary');
 
   // Summary state
@@ -45,11 +47,22 @@ export default function Payouts() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    base44.entities.Stripchat.list().then(setStripchatProfiles);
-    base44.entities.Performer.list().then(setPerformers);
+    const loadInitial = async () => {
+      let allPerformers = await base44.entities.Performer.list();
+      let allStripchat = await base44.entities.Stripchat.list();
+      if (user?.role === 'recruiter') {
+        const myPerformers = allPerformers.filter(p => p.recruiterName === user.full_name);
+        const stageNames = new Set(myPerformers.map(p => p.stageName));
+        allPerformers = myPerformers;
+        allStripchat = allStripchat.filter(s => stageNames.has(s.stageName));
+      }
+      setPerformers(allPerformers);
+      setStripchatProfiles(allStripchat);
+    };
+    loadInitial();
     loadPayouts();
     loadCommissionSettings();
-  }, []);
+  }, [user]);
 
   const loadCommissionSettings = async () => {
     const settings = await base44.entities.CommissionSettings.list();
@@ -138,7 +151,12 @@ export default function Payouts() {
 
   const loadPayouts = async () => {
     setLoading(true);
-    const data = await base44.entities.Payout.list('-date');
+    let data = await base44.entities.Payout.list('-date', 500);
+    if (user?.role === 'recruiter') {
+      const myPerformers = await base44.entities.Performer.filter({ recruiterName: user.full_name });
+      const stageNames = new Set(myPerformers.map(p => p.stageName));
+      data = data.filter(p => stageNames.has(p.stageName));
+    }
     setPayouts(data);
     setLoading(false);
   };

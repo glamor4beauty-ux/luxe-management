@@ -27,6 +27,12 @@ const adminNavItems = [
 const recruiterNavItems = [
   { path: '/recruiter', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/performers', label: 'My Performers', icon: Users },
+  { path: '/memos', label: 'Memos', icon: FileText },
+  { path: '/calendar', label: 'Calendar', icon: Calendar },
+  { path: '/stripchat', label: 'Stripchat', icon: Monitor },
+  { path: '/payouts', label: 'Payouts', icon: DollarSign },
+  { path: '/tasks', label: 'Tasks', icon: ClipboardList },
+  { path: '/analytics', label: 'Analytics', icon: TrendingUp },
 ];
 
 export default function Layout() {
@@ -45,7 +51,7 @@ export default function Layout() {
   // Hide admin pages from non-admin users
   const adminPages = ['/performers', '/memos', '/calendar', '/stripchat', '/payouts', '/tasks'];
   const isAdminPage = adminPages.includes(location.pathname) || adminPages.some(p => location.pathname.startsWith(p + '/'));
-  const canAccessPage = user?.role === 'admin' || !isAdminPage;
+  const canAccessPage = user?.role === 'admin' || user?.role === 'recruiter' || !isAdminPage;
 
   if (!canAccessPage) {
     return (
