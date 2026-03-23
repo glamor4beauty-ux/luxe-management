@@ -126,7 +126,7 @@ export default function AdminKnowledgeBase() {
           placeholder="Search documents..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-card border-border text-foreground h-9"
+          className="bg-card border-border text-foreground h-9 mb-4"
         />
 
       {filtered.length === 0 ? (
