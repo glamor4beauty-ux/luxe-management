@@ -47,6 +47,11 @@ export default function AdminKnowledgeBase() {
         }
 
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        if (!file_url) {
+          toast.error(`${file.name} upload failed`);
+          continue;
+        }
+
         const mimeTypes = {
           '.pdf': 'application/pdf',
           '.txt': 'text/plain',
@@ -60,20 +65,25 @@ export default function AdminKnowledgeBase() {
           fileType: fileType
         });
 
-        if (response.data.success) {
+        if (response?.data?.success) {
           successCount++;
+          toast.success(`${file.name} uploaded`);
+        } else {
+          toast.error(`${file.name} processing failed`);
         }
       } catch (e) {
-        toast.error(`Error uploading ${file.name}`);
+        console.error('Upload error:', e);
+        toast.error(`Error uploading ${file.name}: ${e.message}`);
       }
     }
 
     if (successCount > 0) {
-      toast.success(`${successCount} file(s) uploaded`);
+      toast.success(`Total: ${successCount} file(s) processed`);
       loadEntries();
+    } else if (files.length > 0) {
+      toast.error('No files were uploaded successfully');
     }
     setUploading(false);
-  };
 
   const handleDelete = async (id) => {
     try {
