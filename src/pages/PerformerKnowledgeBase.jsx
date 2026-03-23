@@ -17,6 +17,14 @@ export default function PerformerKnowledgeBase() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    const loadDocuments = async () => {
+      const docs = await base44.asServiceRole.entities.KnowledgeBaseEntry.list('-created_date', 1000);
+      setDocuments(docs);
+    };
+    loadDocuments();
+  }, []);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -37,11 +45,11 @@ export default function PerformerKnowledgeBase() {
 
       if (res.data.success) {
         toast.success('Document uploaded successfully!');
-        setDocuments(prev => [...prev, { id: res.data.entryId, fileName: res.data.fileName }]);
+        const docs = await base44.asServiceRole.entities.KnowledgeBaseEntry.list('-created_date', 1000);
+        setDocuments(docs);
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: `I've added "${res.data.fileName}" to the knowledge base. Feel free to ask me questions about it!`
-        }]);
       } else {
         toast.error(res.data.error || 'Failed to upload document');
       }
@@ -81,6 +89,10 @@ export default function PerformerKnowledgeBase() {
     }
     setLoading(false);
   };
+
+  if (!documents) {
+    return <div className="flex items-center justify-center h-screen"><div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
+  }
 
   return (
     <div className="flex h-screen bg-background flex-col md:flex-row">
