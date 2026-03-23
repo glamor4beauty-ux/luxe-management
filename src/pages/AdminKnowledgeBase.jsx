@@ -99,19 +99,11 @@ export default function AdminKnowledgeBase() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Knowledge Base</h1>
           <p className="text-sm text-muted-foreground mt-1">{entries.length} document(s)</p>
         </div>
-        <Button 
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="bg-primary text-primary-foreground"
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-          Upload Document
-        </Button>
         <input
           ref={fileInputRef}
           type="file"
@@ -120,14 +112,22 @@ export default function AdminKnowledgeBase() {
           onChange={(e) => handleFileUpload(e.target.files)}
           className="hidden"
         />
+        <Button 
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+          Upload Document
+        </Button>
       </div>
 
       <Input
-          placeholder="Search documents..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-card border-border text-foreground h-9 mb-4"
-        />
+        placeholder="Search documents..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="bg-card border-border text-foreground h-9 mb-4"
+      />
 
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
