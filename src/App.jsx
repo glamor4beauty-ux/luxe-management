@@ -24,7 +24,7 @@ import Register from './pages/Register';
 import PerformerDashboard from './pages/PerformerDashboard';
 import PerformerShifts from './pages/PerformerShifts';
 import SupportContact from './pages/SupportContact';
-import KnowledgeBase from './pages/KnowledgeBase';
+import PerformerKnowledgeBase from './pages/PerformerKnowledgeBase';
 import PerformerProfile from './pages/PerformerProfile';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import Users from './pages/Users';
@@ -97,7 +97,7 @@ const AuthenticatedApp = () => {
         <Route path="/performer-performance" element={<PerformerTasks />} />
         <Route path="/performer-instructions" element={<Instructions />} />
         <Route path="/performer-schedule" element={<PerformerShifts />} />
-        <Route path="/performer-knowledge" element={<KnowledgeBase />} />
+        <Route path="/performer-knowledge" element={<PerformerKnowledgeBase />} />
         <Route path="/performer-stripchat-view" element={<PerformerStripchatView />} />
         <Route path="/performer-upload" element={<PerformerUpload />} />
         <Route path="/performer-support" element={<SupportContact />} />
