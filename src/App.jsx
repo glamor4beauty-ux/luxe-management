@@ -46,18 +46,18 @@ const AuthenticatedApp = () => {
     return <Dashboard />; // admin/default
   };
 
-  // Always show custom auth if no user
-  if (!user) {
-    return <CustomAuthForm />;
-  }
-
-  // Show loading spinner while checking app public settings or auth
+  // Show loading spinner while checking auth first
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
       </div>
     );
+  }
+
+  // Only show login after loading is done and no user found
+  if (!user) {
+    return <CustomAuthForm />;
   }
 
   // Handle authentication errors
