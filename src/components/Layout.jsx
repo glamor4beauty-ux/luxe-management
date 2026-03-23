@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import AdminNotifications from './AdminNotifications';
+import ErrorBoundary from './ErrorBoundary';
 import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut, HelpCircle, Menu, X, BookOpen, TrendingUp, UserPlus } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import { useNavigate } from 'react-router-dom';
@@ -152,7 +153,9 @@ export default function Layout() {
           </Sidebar>
           <SidebarInset>
             <div className="p-4 md:p-6 lg:p-8">
-              <Outlet />
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
             </div>
           </SidebarInset>
           <AdminNotifications />
