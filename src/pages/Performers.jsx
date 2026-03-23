@@ -24,7 +24,8 @@ export default function Performers() {
 
   const load = async () => {
     setLoading(true);
-    const data = await base44.entities.Performer.list('-created_date');
+    const res = await base44.functions.invoke('getPerformers', {});
+    const data = res.data?.performers || [];
     let filtered = data;
     if (user?.role === 'recruiter') {
       filtered = data.filter(p => p.recruiterName === user.full_name);
