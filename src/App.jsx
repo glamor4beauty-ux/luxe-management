@@ -33,6 +33,7 @@ import ShiftsDashboard from './pages/ShiftsDashboard';
 import PerformerTasks from './pages/PerformerTasks';
 import AdminKnowledgeBase from './pages/AdminKnowledgeBase';
 import PerformanceAnalytics from './pages/PerformanceAnalytics';
+import Leads from './pages/Leads';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -91,6 +92,7 @@ const AuthenticatedApp = () => {
         <Route path="/shifts-dashboard" element={<ShiftsDashboard />} />
         <Route path="/knowledge-base" element={<AdminKnowledgeBase />} />
         <Route path="/analytics" element={<PerformanceAnalytics />} />
+        <Route path="/leads" element={<Leads />} />
       </Route>
       <Route element={<PerformerMobileLayout />}>
         <Route path="/performer-dashboard" element={<PerformerDashboard />} />
