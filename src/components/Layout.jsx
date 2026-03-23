@@ -2,7 +2,6 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import AdminNotifications from './AdminNotifications';
 import ErrorBoundary from './ErrorBoundary';
 import { Users, FileText, Calendar, Monitor, LayoutDashboard, DollarSign, ClipboardList, Settings, LogOut, HelpCircle, Menu, X, BookOpen, TrendingUp, UserPlus } from 'lucide-react';
-import NotificationBell from './NotificationBell';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
@@ -138,17 +137,7 @@ export default function Layout() {
                 })}
               </SidebarMenu>
               <div className="border-t border-sidebar-border pt-3 mt-auto px-3">
-                <div className="mb-2">
-                  <NotificationBell />
-                </div>
                 <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-sidebar-foreground hover:text-destructive hover:bg-destructive/10 transition-colors font-medium"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
-              </div>
             </SidebarContent>
           </Sidebar>
           <SidebarInset>
