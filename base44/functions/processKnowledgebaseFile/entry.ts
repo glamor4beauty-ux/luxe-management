@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     });
 
     // Store in database
-    const entry = await base44.entities.KnowledgeBaseEntry.create({
+    const entry = await base44.asServiceRole.entities.KnowledgeBaseEntry.create({
       fileName,
       fileUrl,
       fileType: fileType || 'unknown',
