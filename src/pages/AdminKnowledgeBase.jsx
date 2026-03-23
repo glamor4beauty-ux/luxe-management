@@ -113,14 +113,12 @@ export default function AdminKnowledgeBase() {
         />
       </div>
 
-      <div>
-        <Input
+      <Input
           placeholder="Search documents..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="bg-card border-border text-foreground h-9"
         />
-      </div>
 
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
