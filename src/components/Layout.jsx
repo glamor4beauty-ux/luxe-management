@@ -19,8 +19,6 @@ const adminNavItems = [
   { path: '/payouts', label: 'Payouts', icon: DollarSign },
   { path: '/tasks', label: 'Tasks', icon: ClipboardList },
   { path: '/analytics', label: 'Analytics', icon: TrendingUp },
-  { path: '/knowledge-base', label: 'Knowledge Base', icon: BookOpen },
-  { path: '/users', label: 'Users', icon: Settings },
   { path: '/instructions', label: 'Instructions', icon: HelpCircle },
 ];
 
