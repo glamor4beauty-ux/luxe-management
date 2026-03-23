@@ -39,9 +39,12 @@ const getAppParams = () => {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');
 	}
+	// Check access_token first, fall back to _preview_token
+	const token = getAppParamValue("access_token", { removeFromUrl: true }) ||
+		(() => { const p = new URLSearchParams(window.location.search); return p.get('_preview_token'); })();
 	return {
 		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
-		token: getAppParamValue("access_token", { removeFromUrl: true }),
+		token,
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
 		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
 		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
