@@ -50,11 +50,7 @@ export default function Tasks() {
     let performers = allPerformers;
     if (user?.role === 'recruiter') {
       performers = allPerformers.filter(p => p.recruiterName === user.full_name);
-      const stageNames = new Set(performers.map(p => p.stageName));
-      tasks = allTasks.filter(t =>
-        (t.performerStageName && stageNames.has(t.performerStageName)) ||
-        t.assignedTo === user.email
-      );
+      tasks = allTasks.filter(t => t.assignedTo === user.email);
     }
     setTasks(tasks);
     setPerformers(performers);
