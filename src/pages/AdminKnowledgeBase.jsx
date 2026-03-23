@@ -89,7 +89,7 @@ export default function AdminKnowledgeBase() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Knowledge Base</h1>
@@ -103,7 +103,8 @@ export default function AdminKnowledgeBase() {
           {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
           Upload Document
         </Button>
-        <input
+      </div>
+      <input
           ref={fileInputRef}
           type="file"
           multiple
@@ -111,7 +112,6 @@ export default function AdminKnowledgeBase() {
           onChange={(e) => handleFileUpload(e.target.files)}
           className="hidden"
         />
-      </div>
 
       <Input
           placeholder="Search documents..."
