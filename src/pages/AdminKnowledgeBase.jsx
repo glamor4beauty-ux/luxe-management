@@ -89,8 +89,8 @@ export default function AdminKnowledgeBase() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Knowledge Base</h1>
           <p className="text-sm text-muted-foreground mt-1">{entries.length} document(s)</p>
